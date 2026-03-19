@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>두루고등학교 이수학점 계산기</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+</head>
+<body>
+
+<!-- ── 헤더 ─────────────────────────────────────────────── -->
+<header>
+  <h1>두루고등학교 이수학점 계산기</h1>
+  <div class="subtitle">고교학점제(2022 개정 교육과정) — 재학생 졸업 계획 &amp; 전학생 학점 인정</div>
+  <div class="school-badge">🏫 두루고등학교 · 세종특별자치시</div>
+</header>
+
+<!-- ── 진행 단계 ─────────────────────────────────────────── -->
+<nav class="progress-bar" aria-label="단계 표시">
+  <div class="progress-step active" id="ps-1">
+    <div class="step-dot">1</div>
+    <div class="step-label">학생 정보</div>
+  </div>
+  <div class="progress-step" id="ps-2">
+    <div class="step-dot">2</div>
+    <div class="step-label" id="ps-2-label">과목 입력</div>
+  </div>
+  <div class="progress-step" id="ps-3">
+    <div class="step-dot">3</div>
+    <div class="step-label" id="ps-3-label">매칭 검토</div>
+  </div>
+  <div class="progress-step" id="ps-4">
+    <div class="step-dot">4</div>
+    <div class="step-label">졸업 분석</div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 1: 학생 기본 정보 + 유형 선택
+       ══════════════════════════════════════════════════════ -->
+  <div class="step-panel active" id="step-1">
+    <div class="card">
+      <div class="card-title">계산기 유형 선택</div>
+      <div class="type-selector">
+        <button class="type-btn" id="btn-type-current" type="button">
+          <div class="type-icon">📚</div>
+          <div class="type-name">재학생</div>
+          <div class="type-desc">학기별로 이수 과목을 입력하여<br>졸업 요건 점검</div>
+        </button>
+        <button class="type-btn active" id="btn-type-transfer" type="button">
+          <div class="type-icon">🏫</div>
+          <div class="type-name">전학생</div>
+          <div class="type-desc">학기별 이수 과목을 입력하여<br>두루고 편제와 매칭 및 학점 인정 계산</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">학생 기본 정보 입력</div>
+      <div class="form-grid">
+        <div class="form-field" style="grid-column:1/-1">
+          <label for="inp-name">학생 이름</label>
+          <input type="text" id="inp-name" placeholder="홍길동">
+        </div>
+        <div class="form-field">
+          <label for="inp-grade" id="grade-label">현재 재학 학년</label>
+          <select id="inp-grade">
+            <option value="1">1학년</option>
+            <option value="2">2학년</option>
+            <option value="3">3학년</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="inp-semester" id="semester-label">현재 학기</label>
+          <select id="inp-semester">
+            <option value="1">1학기</option>
+            <option value="2">2학기</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-step1">다음 단계 →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">이 계산기 사용법</div>
+      <div class="how-to-grid">
+        <div class="how-to-col">
+          <div class="how-to-title">🏫 전학생 모드</div>
+          <ol>
+            <li>전학생 선택 후 전입 학년·학기 입력</li>
+            <li>학기별로 이전 학교 이수 과목 입력</li>
+            <li>전입 학기 두루고 편제 매칭 결과 검토</li>
+            <li>졸업 요건 분석 확인</li>
+          </ol>
+        </div>
+        <div class="how-to-col">
+          <div class="how-to-title">📚 재학생 모드</div>
+          <ol>
+            <li>재학생 선택 후 현재 학년·학기 입력</li>
+            <li>학기별로 이수 중인 과목 입력</li>
+            <li>졸업 요건 분석 확인</li>
+          </ol>
+        </div>
+      </div>
+      <p style="margin-top:12px; font-size:0.8rem; color:#6b7280;">
+        ※ 이 계산기는 <strong>참고용</strong>이며, 최종 학점 인정·이수 여부는 두루고 교무실 담당 교사와 확인하시기 바랍니다.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 2: 학기별 과목 입력 (전학생 / 재학생 통합)
+       ══════════════════════════════════════════════════════ -->
+  <div class="step-panel" id="step-2">
+    <div class="card">
+      <div class="card-title" id="step2-card-title">📝 학기별 이수 과목 입력</div>
+      <p class="form-hint" id="step2-hint" style="margin-bottom:16px;font-size:0.85rem;color:#6b7280;"></p>
+      <div id="sem-input-container"></div>
+      <div class="btn-row">
+        <button class="btn-secondary" id="btn-back-2">← 이전</button>
+        <button class="btn-primary"   id="btn-step2">다음 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 3: 매칭 검토 (전학생만)
+       ══════════════════════════════════════════════════════ -->
+  <div class="step-panel" id="step-3">
+    <!-- 이전 학기 인정 요약 -->
+    <div id="pre-sem-summary"></div>
+
+    <!-- 전입학기 두루고 편제 매칭 -->
+    <div id="transfer-matching"></div>
+
+    <div class="card" style="padding:16px 24px">
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn-secondary" id="btn-back-3">← 이전</button>
+        <button class="btn-primary"   id="btn-step3">졸업 요건 분석 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 4: 분석 결과
+       ══════════════════════════════════════════════════════ -->
+  <div class="step-panel" id="step-4">
+
+    <!-- 요약 카드 -->
+    <div class="card">
+      <div class="card-title">
+        학점 현황 요약 —
+        <span id="result-name" style="color:var(--gray-900)"></span>
+        <span class="result-type-badge" id="result-type-badge"></span>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="s-value accent" id="result-recognized">—</div>
+          <div class="s-label" id="label-recognized">이수 학점 (교과)</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-value warn" id="result-remaining">—</div>
+          <div class="s-label">졸업까지 남은 교과</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-value" id="result-total">—</div>
+          <div class="s-label">예상 졸업 학점 (목표 192)</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-track-fill" id="progress-bar-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-labels">
+          <span>0</span>
+          <span id="progress-bar-pct" style="font-weight:700; color:var(--primary)">0%</span>
+          <span>192학점 (졸업)</span>
+        </div>
+      </div>
+      <div id="graduation-status" class="grad-status"></div>
+      <p style="font-size:0.8rem; color:var(--gray-500); margin-top:8px;">
+        두루고에서 추가로 이수해야 할 교과 학점: <strong id="progress-need">—</strong>학점
+        <span style="margin-left:10px; color:var(--gray-400)">+ 창의적체험활동 18학점 = 졸업 192학점</span>
+      </p>
+      <div style="margin-top:10px; font-size:0.8rem; color:var(--gray-500); background:var(--gray-50); border-radius:8px; padding:10px 14px;">
+        <strong style="color:var(--gray-700)">학년별 학기당 이수 학점:</strong>
+        1학년 31학점 · 2학년 29학점 · 3학년 27학점
+        <span style="color:var(--gray-400)">(학기당 × 6학기 = 교과 174학점)</span>
+      </div>
+    </div>
+
+    <!-- 영역별 현황 -->
+    <div class="card">
+      <div class="card-title">교과 영역별 이수 현황</div>
+      <div class="table-scroll">
+        <table class="area-table">
+          <thead>
+            <tr>
+              <th>교과 영역</th>
+              <th class="num">최소 필요</th>
+              <th class="num">이수 학점</th>
+              <th class="num">추가 필요</th>
+              <th>진행률</th>
+              <th>충족 여부</th>
+            </tr>
+          </thead>
+          <tbody id="area-table-body"></tbody>
+        </table>
+      </div>
+      <p style="font-size:0.78rem; color:var(--gray-500); margin-top:8px;">
+        ※ 최소 필요 학점은 고교학점제 졸업 기준입니다.
+      </p>
+    </div>
+
+    <!-- 재학생: 편제 자동 충족 안내 -->
+    <div class="card" id="auto-satisfied-card" style="display:none">
+      <div class="card-title">체육 · 예술 · 기타 영역 자동 충족 안내</div>
+      <div id="auto-satisfied-section"></div>
+    </div>
+
+    <!-- 이수 과목 목록 -->
+    <div class="card">
+      <div class="card-title" id="recognized-list-title">이수한 두루고 과목</div>
+      <div id="recognized-list"></div>
+    </div>
+
+    <!-- 두루고에서 이수해야 할 과목 -->
+    <div class="card">
+      <div class="card-title">두루고에서 이수해야 할 과목</div>
+      <p style="font-size:0.83rem; color:#6b7280; margin-bottom:12px;">
+        아래 과목은 두루고 편제 내에서 이수 가능합니다.
+      </p>
+      <div id="tocomplete-list"></div>
+    </div>
+
+    <!-- 대안 이수 경로 -->
+    <div class="card">
+      <div class="card-title">캠퍼스형 · 온라인 공동교육과정 안내</div>
+      <div id="alternative-section"></div>
+    </div>
+
+    <!-- 주의사항 -->
+    <div class="card">
+      <div class="card-title">확인 사항 및 주의사항</div>
+      <ul class="warning-list" id="warning-list"></ul>
+    </div>
+
+    <!-- 액션 버튼 -->
+    <div class="btn-row">
+      <button class="btn-secondary" id="btn-back-4">← 이전 단계</button>
+      <button class="btn-outline"   id="btn-print">🖨 인쇄 / PDF 저장</button>
+      <button class="btn-secondary" id="btn-restart">처음부터</button>
+    </div>
+
+  </div>
+  <!-- /STEP 4 -->
+
+</main>
+
+<!-- ── 과목 선택 모달 ──────────────────────────────────── -->
+<div id="modal-picker">
+  <div class="modal-header">
+    두루고 과목 선택
+    <input type="text" id="picker-search" placeholder="과목명 검색...">
+  </div>
+  <div id="picker-list"></div>
+  <div class="modal-footer">
+    <button class="btn-secondary" id="picker-cancel">취소</button>
+    <button class="btn-primary"   id="picker-ok">확인</button>
+  </div>
+</div>
+<div id="modal-overlay"></div>
+
+<!-- ── 토스트 ──────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<script src="js/data.js?v=5"></script>
+<script src="js/app.js?v=5"></script>
+</body>
+</html>
