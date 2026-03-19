@@ -1074,8 +1074,8 @@ function renderAlternativePaths(res) {
   const section = document.getElementById("alternative-section");
   section.innerHTML = "";
 
-  // 졸업 필수 또는 교과별 필수학점 미충족 여부 확인
-  const hasAreaShortfall = Object.values(res.areaStatus).some(st => st.required > 0 && st.done < st.required);
+  // 두루고 편제 과목을 모두 이수해도 졸업 요건 미충족 여부 확인
+  const hasAreaShortfall = Object.values(res.areaStatus).some(st => st.required > 0 && (st.done + st.remain) < st.required);
   const needsExtra = !res.graduationReady || hasAreaShortfall;
 
   const div = document.createElement("div");
