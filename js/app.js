@@ -938,9 +938,13 @@ function renderStep4() {
   if (autoCard) autoCard.style.display = isCurrent ? "block" : "none";
   if (isCurrent) renderAutoSatisfiedGuidance(res);
 
-  document.getElementById("recognized-list-title").textContent =
-    isCurrent ? "이수 중 / 이수 완료 두루고 과목" : "인정 처리된 두루고 과목";
-  renderSubjectList("recognized-list", res.alreadyDone);
+  // 전학생 모드는 "인정 처리된 두루고 과목" 섹션 불필요 → 숨김
+  const recognizedCard = document.getElementById("recognized-list-title")?.closest(".card");
+  if (recognizedCard) recognizedCard.style.display = isCurrent ? "block" : "none";
+  if (isCurrent) {
+    document.getElementById("recognized-list-title").textContent = "이수 중 / 이수 완료 두루고 과목";
+    renderSubjectList("recognized-list", res.alreadyDone);
+  }
   renderToCompleteList(res);
   renderAlternativePaths(res);
   renderWarnings(res);
