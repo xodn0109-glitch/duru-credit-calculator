@@ -1093,20 +1093,6 @@ function renderAlternativePaths(res) {
       <strong>캠퍼스형 공동교육과정</strong> 또는 <strong>온세종학교</strong>의 개설 과목을 확인하여
       추가 이수를 계획하세요. 담임·교무 선생님과 상담 후 수강 신청하세요.
     </p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
-      <a href="https://www.sje.go.kr" target="_blank" rel="noopener"
-         style="display:inline-flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:600;
-                color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;
-                border-radius:8px;padding:7px 14px;text-decoration:none">
-        🏫 캠퍼스형 공동교육과정 확인
-      </a>
-      <a href="https://onsejong.sje.go.kr" target="_blank" rel="noopener"
-         style="display:inline-flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:600;
-                color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;
-                border-radius:8px;padding:7px 14px;text-decoration:none">
-        💻 온세종학교 확인
-      </a>
-    </div>
   `;
   section.appendChild(div);
 }
