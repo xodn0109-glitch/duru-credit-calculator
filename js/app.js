@@ -341,7 +341,7 @@ function attachAutocomplete(input, creditsInput) {
       div.className = 'ac-item';
       const nameSpan = document.createElement('span');
       nameSpan.className = 'ac-item-name';
-      nameSpan.textContent = c.alias ? `${c.display} → ${c.fill}` : c.display;
+      nameSpan.textContent = c.display;
       const metaSpan = document.createElement('span');
       metaSpan.className = 'ac-item-meta';
       metaSpan.textContent = c.area;
@@ -374,7 +374,8 @@ function attachAutocomplete(input, creditsInput) {
   function selectItem(idx) {
     const c = items[idx];
     if (!c) return;
-    input.value = c.fill;
+    // alias 항목은 입력명 그대로 보존 (매칭은 계산 시 내부적으로 처리)
+    input.value = c.alias ? c.display : c.fill;
     creditsInput.value = c.credits;
     closeDropdown();
   }
