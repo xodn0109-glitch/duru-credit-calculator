@@ -1074,18 +1074,38 @@ function renderSubjectList(containerId, subjects) {
 function renderAlternativePaths(res) {
   const section = document.getElementById("alternative-section");
   section.innerHTML = "";
-  const unresolvable = res.unresolvable;
-  if (unresolvable.length === 0) {
-    section.innerHTML = `<p class="empty-msg good">두루고 편제 내에서 모두 이수 가능합니다.</p>`;
+
+  // 졸업 필수 또는 교과별 필수학점 미충족 여부 확인
+  const hasAreaShortfall = Object.values(res.areaStatus).some(st => st.required > 0 && st.done < st.required);
+  const needsExtra = !res.graduationReady || hasAreaShortfall;
+
+  if (!needsExtra) {
+    section.innerHTML = `<p class="empty-msg good">두루고 편제 내에서 졸업 필수 학점을 모두 이수할 수 있습니다.</p>`;
     return;
   }
+
   const div = document.createElement("div");
   div.className = "alt-card online";
   div.innerHTML = `
-    <div class="alt-card-title">💻 온라인 공동교육과정 검토 필요</div>
-    <p class="alt-desc">아래 과목은 두루고 편제와 자동 매칭되지 않았습니다. 담임·교무 선생님과 상담 후 인정 여부를 확인하세요.</p>
-    <div class="alt-subjects">
-      ${unresolvable.map(m => `<span class="subj-chip chip-online">${m.name} (${m.credits}학점)</span>`).join("")}
+    <div class="alt-card-title">📋 추가 이수 방법 안내</div>
+    <p class="alt-desc">
+      두루고 교육과정만으로 졸업 필수 학점 또는 교과별 필수 학점을 채우기 어려운 경우,
+      <strong>캠퍼스형 공동교육과정</strong> 또는 <strong>온세종학교</strong>의 개설 과목을 확인하여
+      추가 이수를 계획하세요. 담임·교무 선생님과 상담 후 수강 신청하세요.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+      <a href="https://www.sje.go.kr" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:600;
+                color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;
+                border-radius:8px;padding:7px 14px;text-decoration:none">
+        🏫 캠퍼스형 공동교육과정 확인
+      </a>
+      <a href="https://onsejong.sje.go.kr" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:600;
+                color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;
+                border-radius:8px;padding:7px 14px;text-decoration:none">
+        💻 온세종학교 확인
+      </a>
     </div>
   `;
   section.appendChild(div);
