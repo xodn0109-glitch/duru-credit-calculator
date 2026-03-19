@@ -1132,7 +1132,7 @@ function renderToCompleteList(res) {
 
     if (regular.length > 0) {
       // ── 영역별 이수 현황 요약 ──────────────────────────────
-      const AUTO_AREAS = new Set(['korean','math','english']);
+      const AUTO_AREAS = new Set(['korean','math','english','pe']);
       const summaryDiv = document.createElement("div");
       summaryDiv.style.cssText = "margin:14px 0 10px;display:flex;flex-wrap:wrap;gap:6px";
       for (const [areaCode, st] of Object.entries(res.areaStatus)) {
@@ -1148,11 +1148,11 @@ function renderToCompleteList(res) {
       }
       el.appendChild(summaryDiv);
 
-      // 국어·수학·영어 자연 충족 안내
+      // 국어·수학·영어·체육 자연 충족 안내
       if (regular.some(s => AUTO_AREAS.has(s.area))) {
         const autoNote = document.createElement("p");
         autoNote.style.cssText = "font-size:0.78rem;color:var(--accent);margin:0 0 10px;font-weight:500";
-        autoNote.textContent = "✅ 국어·수학·영어는 학교 지정 과목이 많아 재학 중 자연스럽게 필수 학점 충족";
+        autoNote.textContent = "✅ 국어·수학·영어·체육은 학교 지정 과목이 많아 재학 중 자연스럽게 필수 학점 충족";
         el.appendChild(autoNote);
       }
 
@@ -1184,9 +1184,13 @@ function renderToCompleteList(res) {
         section.innerHTML = `<div class="subj-group-title" style="font-size:0.88rem;color:var(--primary)">${header}</div>`;
 
         for (const s of list) {
+          const isSchoolAssigned = AUTO_AREAS.has(s.area);
           const chip = document.createElement("span");
           chip.className = "subj-chip";
-          if (s.isChoiceSlot) {
+          if (isSchoolAssigned) {
+            chip.style.cssText = "background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;opacity:0.9";
+            chip.innerHTML = `${s.name} (${s.credits}학점) <em style="font-size:0.72rem;background:#dcfce7;color:#16a34a;border-radius:4px;padding:1px 5px;font-style:normal;margin-left:2px">🏫 학교 지정</em>`;
+          } else if (s.isChoiceSlot) {
             chip.classList.add("chip-choice");
             chip.innerHTML = `${s.displayName} <em style="opacity:.7">(${s.credits}학점, 택1)</em>`;
           } else {
