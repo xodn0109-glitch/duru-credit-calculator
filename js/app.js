@@ -249,29 +249,31 @@ function appendSubjRow(tbody, name = "", credits = 3, locked = false) {
 function buildAcCandidates() {
   const seen = new Set();
   const items = [];
+  const AREA_LABEL = { korean:'국어', math:'수학', english:'영어', social:'사회',
+    science:'과학', pe:'체육', arts:'예술', others:'기타' };
 
-  // ① 두루고 편제 과목명 (정규 이름)
+  // ① 두루고 편제 과목명 (정규 이름) — 공백 제거 소문자로 빠른 조회용 Set 구축
+  const duruNames = new Set(); // 정규 과목명 (공백 제거 소문자)
   for (const sub of DURU_SUBJECTS) {
     if (!seen.has(sub.id)) {
       seen.add(sub.id);
-      // 교과군 레이블
-      const areaLabel = { korean:'국어', math:'수학', english:'영어', social:'사회',
-        science:'과학', pe:'체육', arts:'예술', others:'기타' }[sub.area] || sub.area;
-      items.push({ display: sub.name, fill: sub.name, credits: sub.credits, area: areaLabel });
+      items.push({ display: sub.name, fill: sub.name, credits: sub.credits,
+        area: AREA_LABEL[sub.area] || sub.area });
     }
+    duruNames.add(sub.name.replace(/\s/g,'').toLowerCase());
   }
 
-  // ② 별칭(alias) → 두루고 과목명으로 안내
+  // ② 별칭(alias) — 두루고 정규 과목명과 겹치는 표시명은 제외 (중복 방지)
   for (const entry of SUBJECT_ALIASES) {
     for (const alias of entry.aliases) {
-      if (alias.length < 2) continue; // 너무 짧은 별칭 제외
+      if (alias.length < 2) continue;
+      // 공백 제거 소문자로 비교 → 두루고 과목명과 동일하면 스킵
+      if (duruNames.has(alias.replace(/\s/g,'').toLowerCase())) continue;
       const targets = entry.targetIds.map(id => DURU_SUBJECTS.find(s => s.id === id)).filter(Boolean);
       if (targets.length === 0) continue;
       const fillName = targets[0].name;
       const credits  = targets[0].credits;
-      const areaLabel = { korean:'국어', math:'수학', english:'영어', social:'사회',
-        science:'과학', pe:'체육', arts:'예술', others:'기타' }[targets[0].area] || targets[0].area;
-      // 정규명과 다른 별칭만 추가
+      const areaLabel = AREA_LABEL[targets[0].area] || targets[0].area;
       if (alias !== fillName) {
         items.push({ display: alias, fill: fillName, credits, area: areaLabel, alias: true });
       }
