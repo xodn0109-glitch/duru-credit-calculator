@@ -171,51 +171,51 @@ function renderStep2() {
     document.getElementById(`btn-add-${key}`).addEventListener("click", () => {
       appendSubjRow(document.getElementById(`tbody-${key}`));
     });
-  }
 
-  // 재학생 & 2학년 이상 → 1학년 교차이수 과목 블록 추가
-  if (!isTrans && grade >= 2) {
-    const CROSS_IDS = ['MU_1','AR_1','TH_1','IN_1','CA_1','EC_1'];
-    const crossKey  = 'cross-y1';
+    // 재학생 & 2학년 이상: 1-2 블록 직후에 교차이수 블록 삽입
+    if (!isTrans && grade >= 2 && year === 1 && s === 2) {
+      const CROSS_IDS = ['MU_1','AR_1','TH_1','IN_1','CA_1','EC_1'];
+      const crossKey  = 'cross-y1';
 
-    if (!state.semesterSubjects[crossKey]) {
-      state.semesterSubjects[crossKey] = CROSS_IDS.map(id => {
-        const sub = DURU_SUBJECTS.find(s => s.id === id);
-        return { name: sub.name, credits: sub.credits, locked: false };
+      if (!state.semesterSubjects[crossKey]) {
+        state.semesterSubjects[crossKey] = CROSS_IDS.map(id => {
+          const sub = DURU_SUBJECTS.find(sc => sc.id === id);
+          return { name: sub.name, credits: sub.credits, locked: false };
+        });
+      }
+
+      const crossBlock = document.createElement("div");
+      crossBlock.className = "sem-block past";
+      crossBlock.innerHTML = `
+        <div class="sem-block-header">
+          <span class="sem-title">1학년 학기별 교차이수 과목</span>
+          <span class="sem-status-badge past">✅ 이수 완료</span>
+          <span style="font-size:0.75rem;color:var(--gray-500);margin-left:8px">음악·미술·기술가정·정보·진로와직업·생태와환경</span>
+        </div>
+        <div class="sem-body">
+          <table class="subj-input-table">
+            <thead>
+              <tr>
+                <th>과목명</th>
+                <th style="width:76px">학점</th>
+                <th style="width:34px"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-${crossKey}"></tbody>
+          </table>
+          <button class="btn-add btn-add-row" id="btn-add-${crossKey}">+ 과목 추가</button>
+        </div>
+      `;
+      container.appendChild(crossBlock);
+
+      const crossTbody = document.getElementById(`tbody-${crossKey}`);
+      for (const sub of state.semesterSubjects[crossKey]) {
+        appendSubjRow(crossTbody, sub.name, sub.credits, sub.locked);
+      }
+      document.getElementById(`btn-add-${crossKey}`).addEventListener("click", () => {
+        appendSubjRow(crossTbody);
       });
     }
-
-    const crossBlock = document.createElement("div");
-    crossBlock.className = "sem-block past";
-    crossBlock.innerHTML = `
-      <div class="sem-block-header">
-        <span class="sem-title">1학년 교차이수 과목</span>
-        <span class="sem-status-badge past">✅ 이수 완료</span>
-        <span style="font-size:0.75rem;color:var(--gray-500);margin-left:8px">음악·미술·기술가정·정보·진로와직업·생태와환경</span>
-      </div>
-      <div class="sem-body">
-        <table class="subj-input-table">
-          <thead>
-            <tr>
-              <th>과목명</th>
-              <th style="width:76px">학점</th>
-              <th style="width:34px"></th>
-            </tr>
-          </thead>
-          <tbody id="tbody-${crossKey}"></tbody>
-        </table>
-        <button class="btn-add btn-add-row" id="btn-add-${crossKey}">+ 과목 추가</button>
-      </div>
-    `;
-    container.appendChild(crossBlock);
-
-    const crossTbody = document.getElementById(`tbody-${crossKey}`);
-    for (const sub of state.semesterSubjects[crossKey]) {
-      appendSubjRow(crossTbody, sub.name, sub.credits, sub.locked);
-    }
-    document.getElementById(`btn-add-${crossKey}`).addEventListener("click", () => {
-      appendSubjRow(crossTbody);
-    });
   }
 }
 
