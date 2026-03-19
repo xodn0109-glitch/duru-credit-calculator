@@ -46,6 +46,7 @@ header {
 .header-inner {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 20px;
   max-width: 860px;
   margin: 0 auto;
