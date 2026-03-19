@@ -291,10 +291,7 @@ const SUBJECT_ALIASES = [
   // 기본수학1·2: 타교 이수 시 공통수학에 준하여 인정
   { aliases:["기본수학","기본수학1"],                                targetIds:["MA_C1"] },
   { aliases:["기본수학2"],                                           targetIds:["MA_C2"] },
-  // 2022개정 "대수"는 MA_G1(대수)만 매핑 (공통수학2와 별개 과목)
-  { aliases:["대수"],                                                targetIds:["MA_G1"] },
-  // 구교육과정 수학I → 공통수학2 + 대수 내용 포함
-  { aliases:["수학I","수학1","수학Ⅰ"],                              targetIds:["MA_C2","MA_G1"] },
+  { aliases:["대수","수학I","수학1","수학Ⅰ"],                       targetIds:["MA_C2","MA_G1"] },
   // 구교육과정 수학II(극한·미분·적분) → 미적분Ⅰ에 가장 유사
   { aliases:["수학II","수학Ⅱ","수학2"],                             targetIds:["MA_G2"] },
   { aliases:["기하","기하와벡터"],                                   targetIds:["MA_CA1"] },
