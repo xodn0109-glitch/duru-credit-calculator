@@ -143,6 +143,7 @@ function renderStep2() {
       <div class="sem-block-header">
         <span class="sem-title">${year}학년 ${s}학기</span>
         <span class="sem-status-badge ${statusClass}">${statusLabel}</span>
+        <span id="sem-total-${key}" style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-left:8px">총 0학점</span>
         ${isTransferSem
           ? `<span style="font-size:0.75rem;color:var(--primary);margin-left:auto;white-space:nowrap">이전 학교에서 이수한 과목 입력</span>`
           : ''}
@@ -190,6 +191,7 @@ function renderStep2() {
         <div class="sem-block-header">
           <span class="sem-title">1학년 학기별 교차이수 과목</span>
           <span class="sem-status-badge past">✅ 이수 완료</span>
+          <span id="sem-total-${crossKey}" style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-left:8px">총 0학점</span>
           <span style="font-size:0.75rem;color:var(--gray-500);margin-left:8px">음악·미술·기술가정·정보·진로와직업·생태와환경</span>
         </div>
         <div class="sem-body">
@@ -229,6 +231,20 @@ function getInitialSubjects(year, s) {
     .map(sub => ({ name: sub.name, credits: sub.credits, locked: false }));
 }
 
+// 학기 블록 총 학점 업데이트
+function updateSemTotal(tbody) {
+  const key = tbody.id.replace('tbody-', '');
+  const totalEl = document.getElementById(`sem-total-${key}`);
+  if (!totalEl) return;
+  let total = 0;
+  tbody.querySelectorAll('.inp-subj-credits').forEach(inp => {
+    const v = parseInt(inp.value);
+    if (!isNaN(v) && v > 0) total += v;
+  });
+  totalEl.textContent = `총 ${total}학점`;
+  totalEl.style.color = total > 0 ? 'var(--primary)' : 'var(--gray-400)';
+}
+
 function appendSubjRow(tbody, name = "", credits = 3, locked = false) {
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -237,12 +253,17 @@ function appendSubjRow(tbody, name = "", credits = 3, locked = false) {
     <td>${locked ? '' : '<button class="btn-remove-row" title="삭제">✕</button>'}</td>
   `;
   if (!locked) {
-    tr.querySelector(".btn-remove-row").addEventListener("click", () => tr.remove());
+    tr.querySelector(".btn-remove-row").addEventListener("click", () => {
+      tr.remove();
+      updateSemTotal(tbody);
+    });
     const nameInput    = tr.querySelector(".inp-subj-name");
     const creditsInput = tr.querySelector(".inp-subj-credits");
+    creditsInput.addEventListener("input", () => updateSemTotal(tbody));
     attachAutocomplete(nameInput, creditsInput);
   }
   tbody.appendChild(tr);
+  updateSemTotal(tbody);
 }
 
 // ── 과목 자동완성 ─────────────────────────────────────────────
