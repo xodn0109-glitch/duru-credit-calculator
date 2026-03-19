@@ -1184,7 +1184,7 @@ function renderToCompleteList(res) {
         section.innerHTML = `<div class="subj-group-title" style="font-size:0.88rem;color:var(--primary)">${header}</div>`;
 
         for (const s of list) {
-          const isSchoolAssigned = AUTO_AREAS.has(s.area);
+          const isSchoolAssigned = AUTO_AREAS.has(s.area) && !s.selectionPool;
           const chip = document.createElement("span");
           chip.className = "subj-chip";
           if (isSchoolAssigned) {
