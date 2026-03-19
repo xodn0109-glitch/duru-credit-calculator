@@ -180,7 +180,7 @@ function renderStep2() {
       if (!state.semesterSubjects[crossKey]) {
         state.semesterSubjects[crossKey] = CROSS_IDS.map(id => {
           const sub = DURU_SUBJECTS.find(sc => sc.id === id);
-          return { name: sub.name, credits: sub.credits, locked: false };
+          return { name: sub.name, credits: sub.credits, locked: false }; // 미이수 시 삭제 가능
         });
       }
 
@@ -221,11 +221,12 @@ function renderStep2() {
 
 // 학기 초기 과목 (재학생: 선택 없이 전원 필수 이수 과목 자동 채움)
 // selectionPool·choiceGroup이 모두 없는 과목 = 학교 지정 고정 과목
+// locked: false → 미이수 처리 시 사용자가 직접 삭제 가능
 function getInitialSubjects(year, s) {
   if (state.userType !== 'current') return [];
   return DURU_SUBJECTS
     .filter(sub => sub.year === year && sub.semester === s && !sub.selectionPool && !sub.choiceGroup)
-    .map(sub => ({ name: sub.name, credits: sub.credits, locked: true }));
+    .map(sub => ({ name: sub.name, credits: sub.credits, locked: false }));
 }
 
 function appendSubjRow(tbody, name = "", credits = 3, locked = false) {
