@@ -219,11 +219,12 @@ function renderStep2() {
   }
 }
 
-// 학기 초기 과목 (재학생: 공통과목 자동 채움)
+// 학기 초기 과목 (재학생: 선택 없이 전원 필수 이수 과목 자동 채움)
+// selectionPool·choiceGroup이 모두 없는 과목 = 학교 지정 고정 과목
 function getInitialSubjects(year, s) {
   if (state.userType !== 'current') return [];
   return DURU_SUBJECTS
-    .filter(sub => sub.year === year && sub.semester === s && sub.type === 'common')
+    .filter(sub => sub.year === year && sub.semester === s && !sub.selectionPool && !sub.choiceGroup)
     .map(sub => ({ name: sub.name, credits: sub.credits, locked: true }));
 }
 
