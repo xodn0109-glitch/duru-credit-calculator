@@ -1110,49 +1110,66 @@ function renderToCompleteList(res) {
     }
 
     if (regular.length > 0) {
+      // ── 영역별 이수 현황 요약 ──────────────────────────────
+      const AUTO_AREAS = new Set(['korean','math','english']);
+      const summaryDiv = document.createElement("div");
+      summaryDiv.style.cssText = "margin:14px 0 10px;display:flex;flex-wrap:wrap;gap:6px";
+      for (const [areaCode, st] of Object.entries(res.areaStatus)) {
+        if (!st.required) continue;
+        const hasSubjects = regular.some(s => s.area === areaCode);
+        if (!hasSubjects) continue;
+        const ok = st.done >= st.required;
+        const color = ok ? '#059669' : '#dc2626';
+        const bg   = ok ? '#d1fae5' : '#fee2e2';
+        const autoNote = AUTO_AREAS.has(areaCode) ? ' ✅' : '';
+        summaryDiv.innerHTML += `<span style="font-size:0.75rem;background:${bg};color:${color};border-radius:6px;padding:3px 8px;font-weight:600">` +
+          `${AREA_NAMES[areaCode]}${autoNote} · 필수 ${st.required}학점 | 인정 ${st.done}학점 | 잔여 ${Math.max(0,st.required-st.done)}학점</span>`;
+      }
+      el.appendChild(summaryDiv);
+
+      // 국어·수학·영어 자연 충족 안내
+      if (regular.some(s => AUTO_AREAS.has(s.area))) {
+        const autoNote = document.createElement("p");
+        autoNote.style.cssText = "font-size:0.78rem;color:var(--accent);margin:0 0 10px;font-weight:500";
+        autoNote.textContent = "✅ 국어·수학·영어는 학교 지정 과목이 많아 재학 중 자연스럽게 필수 학점 충족";
+        el.appendChild(autoNote);
+      }
+
       const info = document.createElement("p");
-      info.style.cssText = "font-size:0.82rem;color:var(--gray-500);margin:14px 0 10px";
+      info.style.cssText = "font-size:0.82rem;color:var(--gray-500);margin:4px 0 10px";
       info.textContent = "▼ 두루고 편제 내 아직 미선택 과목 — 필요 학점만큼 이수 계획 수립";
       el.appendChild(info);
 
-      const AUTO_AREAS = new Set(['korean','math','english']);
-      const groups = {};
+      // ── 학기별로 그룹핑 ────────────────────────────────────
+      const semGroups = {};
       for (const s of regular) {
-        if (!groups[s.area]) groups[s.area] = [];
-        groups[s.area].push(s);
+        const key = s.semester != null ? `${s.year}-${s.semester}` : `${s.year}-0`;
+        if (!semGroups[key]) semGroups[key] = [];
+        semGroups[key].push(s);
       }
+      const sortedKeys = Object.keys(semGroups).sort((a, b) => {
+        const [ay, as] = a.split('-').map(Number);
+        const [by, bs] = b.split('-').map(Number);
+        return ay !== by ? ay - by : as - bs;
+      });
 
-      for (const [areaCode, list] of Object.entries(groups)) {
-        const st = res.areaStatus[areaCode];
-        const areaName = AREA_NAMES[areaCode] || areaCode;
+      for (const key of sortedKeys) {
+        const list = semGroups[key];
+        const [year, sem] = key.split('-').map(Number);
+        const header = sem === 0 ? `${year}학년 교차이수` : `${year}학년 ${sem}학기`;
+
         const section = document.createElement("div");
         section.className = "subj-group";
-
-        let creditBadge = '';
-        if (st) {
-          const color = st.done >= st.required ? 'var(--accent)' : 'var(--error)';
-          creditBadge = `<span style="font-size:0.75rem;font-weight:400;color:${color};margin-left:6px">` +
-            `필수 ${st.required}학점 | 인정 ${st.done}학점 | 잔여 ${Math.max(0, st.required - st.done)}학점</span>`;
-        }
-        section.innerHTML = `<div class="subj-group-title">${areaName}${creditBadge}</div>`;
-
-        if (AUTO_AREAS.has(areaCode)) {
-          const note = document.createElement("p");
-          note.style.cssText = "font-size:0.78rem;color:var(--accent);margin:2px 0 6px;font-weight:500";
-          note.textContent = "✅ 학교 지정 과목이 많아 재학 중 자연스럽게 필수 학점 충족";
-          section.appendChild(note);
-        }
+        section.innerHTML = `<div class="subj-group-title" style="font-size:0.88rem;color:var(--primary)">${header}</div>`;
 
         for (const s of list) {
           const chip = document.createElement("span");
           chip.className = "subj-chip";
-          const semStr = semLabel(s);
-          const semTag = semStr ? `<em style="font-style:normal;font-size:0.72rem;opacity:0.7;margin-left:3px">[${semStr}]</em>` : '';
           if (s.isChoiceSlot) {
             chip.classList.add("chip-choice");
-            chip.innerHTML = `${s.displayName} <em style="opacity:.7">(${s.credits}학점, 택1)</em>${semTag}`;
+            chip.innerHTML = `${s.displayName} <em style="opacity:.7">(${s.credits}학점, 택1)</em>`;
           } else {
-            chip.innerHTML = `${s.name} (${s.credits}학점)${semTag}`;
+            chip.textContent = `${s.name} (${s.credits}학점)`;
           }
           if (s.campus) chip.classList.add("chip-campus");
           section.appendChild(chip);
