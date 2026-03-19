@@ -172,6 +172,51 @@ function renderStep2() {
       appendSubjRow(document.getElementById(`tbody-${key}`));
     });
   }
+
+  // 재학생 & 2학년 이상 → 1학년 교차이수 과목 블록 추가
+  if (!isTrans && grade >= 2) {
+    const CROSS_IDS = ['MU_1','AR_1','TH_1','IN_1','CA_1','EC_1'];
+    const crossKey  = 'cross-y1';
+
+    if (!state.semesterSubjects[crossKey]) {
+      state.semesterSubjects[crossKey] = CROSS_IDS.map(id => {
+        const sub = DURU_SUBJECTS.find(s => s.id === id);
+        return { name: sub.name, credits: sub.credits, locked: false };
+      });
+    }
+
+    const crossBlock = document.createElement("div");
+    crossBlock.className = "sem-block past";
+    crossBlock.innerHTML = `
+      <div class="sem-block-header">
+        <span class="sem-title">1학년 교차이수 과목</span>
+        <span class="sem-status-badge past">✅ 이수 완료</span>
+        <span style="font-size:0.75rem;color:var(--gray-500);margin-left:8px">음악·미술·기술가정·정보·진로와직업·생태와환경</span>
+      </div>
+      <div class="sem-body">
+        <table class="subj-input-table">
+          <thead>
+            <tr>
+              <th>과목명</th>
+              <th style="width:76px">학점</th>
+              <th style="width:34px"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-${crossKey}"></tbody>
+        </table>
+        <button class="btn-add btn-add-row" id="btn-add-${crossKey}">+ 과목 추가</button>
+      </div>
+    `;
+    container.appendChild(crossBlock);
+
+    const crossTbody = document.getElementById(`tbody-${crossKey}`);
+    for (const sub of state.semesterSubjects[crossKey]) {
+      appendSubjRow(crossTbody, sub.name, sub.credits, sub.locked);
+    }
+    document.getElementById(`btn-add-${crossKey}`).addEventListener("click", () => {
+      appendSubjRow(crossTbody);
+    });
+  }
 }
 
 // 학기 초기 과목 (재학생: 공통과목 자동 채움)
@@ -383,8 +428,12 @@ function attachAutocomplete(input, creditsInput) {
 // DOM에서 학기별 과목 수집
 function collectSemesterSubjects() {
   const { grade, semester } = state.studentInfo;
-  for (const { year, semester: s } of getSemesters(grade, semester)) {
-    const key = `${year}-${s}`;
+
+  const allKeys = getSemesters(grade, semester).map(({year, semester: s}) => `${year}-${s}`);
+  // 재학생 2학년 이상이면 교차이수 블록도 수집
+  if (state.userType !== 'transfer' && grade >= 2) allKeys.push('cross-y1');
+
+  for (const key of allKeys) {
     const tbody = document.getElementById(`tbody-${key}`);
     if (!tbody) continue;
     state.semesterSubjects[key] = [];
@@ -440,6 +489,14 @@ function computeCurrentMatching() {
       return { ...sub, ...r };
     });
     semResults.push({ year, semester: s, subjects });
+  }
+
+  // 재학생 2학년 이상: 1학년 교차이수 블록 과목도 인정
+  if (grade >= 2 && state.semesterSubjects['cross-y1']) {
+    for (const sub of state.semesterSubjects['cross-y1']) {
+      const r = autoMatch(sub.name);
+      if (r.matched) r.targets.forEach(t => recognizedIds.add(t.id));
+    }
   }
 
   state.matchResults = { type: 'current', recognizedIds, semResults };
