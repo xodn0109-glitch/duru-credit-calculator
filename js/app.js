@@ -742,10 +742,21 @@ function renderStep3() {
   if (dupSubjects.length > 0) {
     const dupDiv = document.createElement("div");
     dupDiv.className = "dup-warn-block";
+    const dupLines = dupSubjects.map(m => {
+      const chip = `<span class="subj-chip" style="background:#fef9c3;color:#92400e;border:1px solid #fde68a">${m.name}(${m.credits}학점)</span>`;
+      const targets = (m.targets || []);
+      const mappedTarget = targets.find(t => t.name !== m.name);
+      if (mappedTarget) {
+        return `<div style="margin-bottom:4px">${chip} <span style="color:var(--gray-600);font-size:0.78rem">→ <b>${mappedTarget.name}</b>으로 인정되어 중복이수</span></div>`;
+      } else if (targets.length > 0) {
+        return `<div style="margin-bottom:4px">${chip} <span style="color:var(--gray-600);font-size:0.78rem">→ 동일 과목 중복이수</span></div>`;
+      }
+      return `<div style="margin-bottom:4px">${chip}</div>`;
+    }).join("");
     dupDiv.innerHTML = `
-      <div style="font-weight:700;font-size:0.85rem;margin-bottom:6px">🔁 중복 이수 과목</div>
-      <div>${dupSubjects.map(m => `<span class="subj-chip" style="background:#fef9c3;color:#92400e;border:1px solid #fde68a">${m.name}(${m.credits}학점)</span>`).join("")}</div>
-      <div style="font-size:0.78rem;color:var(--gray-600);margin-top:6px">이전 학기에 이수한 과목과 중복됩니다. 교과 총점(국·영·수 등) 한도 초과 여부를 확인하세요.</div>
+      <div style="font-weight:700;font-size:0.85rem;margin-bottom:8px">🔁 중복 이수 과목</div>
+      ${dupLines}
+      <div style="font-size:0.78rem;color:var(--gray-600);margin-top:4px">교과 총점(국·영·수 등) 한도 초과 여부를 확인하세요.</div>
     `;
     card2.appendChild(dupDiv);
   }
