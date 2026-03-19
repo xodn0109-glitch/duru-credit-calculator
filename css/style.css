@@ -41,27 +41,36 @@ body {
 header {
   background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%);
   color: #fff;
-  padding: 28px 24px 24px;
-  text-align: center;
+  padding: 20px 32px;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.header-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #fff;
+}
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 header h1 {
   font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -0.3px;
-  margin-bottom: 4px;
 }
 header .subtitle {
   font-size: 0.9rem;
   opacity: 0.85;
-}
-header .school-badge {
-  display: inline-block;
-  background: rgba(255,255,255,0.2);
-  border-radius: 20px;
-  padding: 3px 14px;
-  font-size: 0.8rem;
-  margin-top: 8px;
-  font-weight: 600;
 }
 
 /* ── 진행 단계 표시 ──────────────────────────────────────── */
