@@ -1079,21 +1079,27 @@ function renderAlternativePaths(res) {
   const hasAreaShortfall = Object.values(res.areaStatus).some(st => st.required > 0 && st.done < st.required);
   const needsExtra = !res.graduationReady || hasAreaShortfall;
 
-  if (!needsExtra) {
-    section.innerHTML = `<p class="empty-msg good">두루고 편제 내에서 졸업 필수 학점을 모두 이수할 수 있습니다.</p>`;
-    return;
-  }
-
   const div = document.createElement("div");
   div.className = "alt-card online";
-  div.innerHTML = `
-    <div class="alt-card-title">📋 추가 이수 방법 안내</div>
-    <p class="alt-desc">
-      두루고 교육과정만으로 졸업 필수 학점 또는 교과별 필수 학점을 채우기 어려운 경우,
-      <strong>캠퍼스형 공동교육과정</strong> 또는 <strong>온세종학교</strong>의 개설 과목을 확인하여
-      추가 이수를 계획하세요. 담임·교무 선생님과 상담 후 수강 신청하세요.
-    </p>
-  `;
+
+  if (!needsExtra) {
+    div.style.cssText = "background:#f0fdf4;border-color:#bbf7d0";
+    div.innerHTML = `
+      <div class="alt-card-title" style="color:#15803d">✅ 두루고 교육과정 이수만으로 졸업학점 및 교과별 필수 이수학점 충족 가능</div>
+      <p class="alt-desc" style="color:#166534">
+        캠퍼스형 공동교육과정이나 온세종학교 수강 없이 두루고 편제 과목 이수만으로 졸업 요건을 충족할 수 있습니다.
+      </p>
+    `;
+  } else {
+    div.innerHTML = `
+      <div class="alt-card-title">📋 추가 이수 방법 안내</div>
+      <p class="alt-desc">
+        두루고 교육과정만으로 졸업 필수 학점 또는 교과별 필수 학점을 채우기 어려운 경우,
+        <strong>캠퍼스형 공동교육과정</strong> 또는 <strong>온세종학교</strong>의 개설 과목을 확인하여
+        추가 이수를 계획하세요. 담임·교무 선생님과 상담 후 수강 신청하세요.
+      </p>
+    `;
+  }
   section.appendChild(div);
 }
 
