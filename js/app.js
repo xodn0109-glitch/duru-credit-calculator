@@ -924,8 +924,7 @@ function renderStep4() {
   document.getElementById("progress-bar-fill").style.width = pct + "%";
   document.getElementById("progress-bar-pct").textContent  = pct + "%";
   document.getElementById("progress-need").textContent     = res.stillNeededSubject;
-  document.getElementById("label-recognized").textContent  =
-    isCurrent ? "이수 학점 (교과)" : "인정 학점 (교과)";
+  document.getElementById("label-recognized").textContent  = "인정 학점";
 
   const statusEl = document.getElementById("graduation-status");
   const totalGap = GRADUATION_REQUIREMENTS.totalCredits - res.totalExpected;
