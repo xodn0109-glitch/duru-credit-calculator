@@ -968,7 +968,6 @@ function renderStep4() {
     renderSubjectList("recognized-list", res.alreadyDone);
   }
   renderAlternativePaths(res);
-  renderWarnings(res);
 }
 
 // ── 재학생: 편제 자동 충족 영역 안내 ─────────────────────────
