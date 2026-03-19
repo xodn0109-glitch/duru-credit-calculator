@@ -957,7 +957,11 @@ tbody tr:hover { background: var(--gray-50); }
 
 /* ── 반응형 ──────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  header h1     { font-size: 1.3rem; }
+  header        { padding: 20px 16px; }
+  .header-inner { flex-direction: column; gap: 10px; text-align: center; }
+  .header-logo  { width: 56px; height: 56px; }
+  header h1     { font-size: 1.25rem; }
+  header .subtitle { font-size: 0.8rem; }
   .progress-bar { gap: 0; padding: 12px 8px; }
   .step-label   { font-size: 0.65rem; }
   .summary-grid { grid-template-columns: repeat(2, 1fr); }
