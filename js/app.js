@@ -1079,10 +1079,52 @@ function renderToCompleteList(res) {
     info.style.cssText = "font-size:0.82rem;color:var(--gray-500);margin:14px 0 10px";
     info.textContent = "▼ 두루고 편제 내 아직 미선택 과목 — 필요 학점만큼 이수 계획 수립";
     el.appendChild(info);
-    const wrapper = document.createElement("div");
-    wrapper.id = "tocomplete-elective-wrapper";
-    el.appendChild(wrapper);
-    renderSubjectList("tocomplete-elective-wrapper", res.electiveToComplete);
+
+    // 영역별로 그룹핑하여 필수학점 정보와 함께 렌더
+    const AUTO_AREAS = new Set(['korean','math','english']); // 학교 지정으로 자연 충족 영역
+    const groups = {};
+    for (const s of res.electiveToComplete) {
+      if (!groups[s.area]) groups[s.area] = [];
+      groups[s.area].push(s);
+    }
+
+    for (const [areaCode, list] of Object.entries(groups)) {
+      const st = res.areaStatus[areaCode];
+      const areaName = AREA_NAMES[areaCode] || areaCode;
+      const section = document.createElement("div");
+      section.className = "subj-group";
+
+      // 영역 헤더 + 학점 현황
+      let creditBadge = '';
+      if (st) {
+        const color = st.done >= st.required ? 'var(--accent)' : 'var(--error)';
+        creditBadge = `<span style="font-size:0.75rem;font-weight:400;color:${color};margin-left:6px">` +
+          `필수 ${st.required}학점 | 인정 ${st.done}학점 | 잔여 ${Math.max(0, st.required - st.done)}학점</span>`;
+      }
+      section.innerHTML = `<div class="subj-group-title">${areaName}${creditBadge}</div>`;
+
+      // 국어·수학·영어: 자연 충족 안내
+      if (AUTO_AREAS.has(areaCode)) {
+        const note = document.createElement("p");
+        note.style.cssText = "font-size:0.78rem;color:var(--accent);margin:2px 0 6px;font-weight:500";
+        note.textContent = "✅ 학교 지정 과목이 많아 재학 중 자연스럽게 필수 학점 충족";
+        section.appendChild(note);
+      }
+
+      for (const s of list) {
+        const chip = document.createElement("span");
+        chip.className = "subj-chip";
+        if (s.isChoiceSlot) {
+          chip.classList.add("chip-choice");
+          chip.innerHTML = `${s.displayName} <em style="opacity:.7">(${s.credits}학점, 택1)</em>`;
+        } else {
+          chip.textContent = `${s.name} (${s.credits}학점)`;
+        }
+        if (s.campus) chip.classList.add("chip-campus");
+        section.appendChild(chip);
+      }
+      el.appendChild(section);
+    }
   }
 }
 
