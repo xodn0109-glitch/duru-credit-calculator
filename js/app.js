@@ -547,11 +547,8 @@ function computeTransferMatching() {
     preSems.push({ year, semester: s, subjects });
   }
 
-  // ② 두루고 전입학기 고정 과목 (학교 지정 필수 과목만 — selectionPool·choiceGroup 없는 것)
-  // 선택과목(selectionPool)은 학생이 입력한 것만 처리하므로 여기서 제외
-  const duruFixed = DURU_SUBJECTS.filter(s =>
-    s.year === grade && s.semester === semester && !s.selectionPool && !s.choiceGroup
-  );
+  // ② 두루고 전입학기 고정 과목 (매칭 후 재구성 — 아래 ④ 이후에 확정)
+  let duruFixed = [];
 
   // ③ 분산배치 반 그룹 결정 (1학년만 해당)
   // 두루고 분산배치는 반 단위로 교차: 기가 반(A그룹)↔정보 반(B그룹)
@@ -614,6 +611,14 @@ function computeTransferMatching() {
   // 교양 보완쌍 상호 인정: 진로와직업(CA_1) ↔ 생태와환경(EC_1)
   if (transMatchedIds.has('CA_1')) transMatchedIds.add('EC_1');
   if (transMatchedIds.has('EC_1')) transMatchedIds.add('CA_1');
+
+  // ④-b 두루고 전입학기 과목 확정: 필수 과목 + 학생이 선택한 과목
+  // 필수 과목(selectionPool·choiceGroup 없는 것)은 항상 포함
+  // 선택과목은 학생이 실제 입력하여 매칭된 것만 포함 (미선택 과목은 제외)
+  duruFixed = DURU_SUBJECTS.filter(s =>
+    s.year === grade && s.semester === semester &&
+    (!s.selectionPool && !s.choiceGroup || transMatchedIds.has(s.id))
+  );
 
   // ⑤ 슬롯별 매칭 상태 판정
   const fixedSlotStatus = duruFixed.map(slot => ({
@@ -707,7 +712,7 @@ function renderStep3() {
 
   // 고정 과목 슬롯
   const fixedWrap = document.createElement("div");
-  fixedWrap.innerHTML = `<div class="slot-section-title">공통·선택 과목 (고정)</div>`;
+  fixedWrap.innerHTML = `<div class="slot-section-title">두루고 편제 과목 매칭</div>`;
 
   for (const { slot, matched, preDup } of mr.fixedSlotStatus) {
     fixedWrap.appendChild(makeSlotRow(slot, matched, preDup, mr, '중복이수'));
