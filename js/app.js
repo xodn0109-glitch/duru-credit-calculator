@@ -533,68 +533,31 @@ function computeTransferMatching() {
   const { grade, semester } = state.studentInfo;
   const sems = getSemesters(grade, semester);
 
-  // ① 전입 이전 학기: 자동 매칭 → preIds 수집
-  const preIds = new Set();
+  // ① 전입 이전 학기: 학점 합산만 (매칭 불필요 — 이미 이수 완료된 학점)
+  let preCredits = 0;
   const preSems = [];
   for (const { year, semester: s } of sems) {
     if (year === grade && s === semester) break;
     const key = `${year}-${s}`;
-    const subjects = (state.semesterSubjects[key] || []).map(sub => {
-      const r = autoMatch(sub.name);
-      if (r.matched) r.targets.forEach(t => preIds.add(t.id));
-      return { ...sub, ...r };
-    });
-    preSems.push({ year, semester: s, subjects });
+    const subjects = state.semesterSubjects[key] || [];
+    const semCredits = subjects.reduce((a, sub) => a + sub.credits, 0);
+    preCredits += semCredits;
+    preSems.push({ year, semester: s, subjects, semCredits });
   }
 
   // ② 두루고 전입학기 고정 과목 (매칭 후 재구성 — 아래 ④ 이후에 확정)
   let duruFixed = [];
 
   // ③ 분산배치 반 그룹 결정 (1학년만 해당)
-  // 두루고 분산배치는 반 단위로 교차: 기가 반(A그룹)↔정보 반(B그룹)
-  // 1학기에 A그룹 과목 이수 → 2학기에 B그룹 배정 (역도 동일)
+  // 이전 학교 과목 매칭 정보 없으므로 전입 전학생은 항상 반 배정에 따라 결정
   const distSlots = [];
   if (grade === 1) {
-    const aCount = DIST_GROUP_A.filter(id => preIds.has(id)).length;
-    const bCount = DIST_GROUP_B.filter(id => preIds.has(id)).length;
-
-    let assign2nd = null; // 2학기에 배정할 그룹
-    if (aCount > 0 && bCount === 0) {
-      assign2nd = DIST_GROUP_B; // 1학기 A그룹 → 2학기 B그룹
-    } else if (bCount > 0 && aCount === 0) {
-      assign2nd = DIST_GROUP_A; // 1학기 B그룹 → 2학기 A그룹
-    } else if (aCount > 0 && bCount > 0) {
-      // 양쪽 모두 이수 → TH_1↔IN_1 기준으로 반 결정
-      if (preIds.has('TH_1') && !preIds.has('IN_1')) assign2nd = DIST_GROUP_B;
-      else if (preIds.has('IN_1') && !preIds.has('TH_1')) assign2nd = DIST_GROUP_A;
-      else assign2nd = DIST_GROUP_B; // 둘 다 이수 시 기본값
-    }
-    // else: aCount===0 && bCount===0 → assign2nd = null (반 미정)
-
-    if (assign2nd) {
-      for (const id of assign2nd) {
-        const sub = getSubjectById(id);
-        if (!sub) continue;
-        const pair = COMPLEMENT_PAIRS.find(p => p.a === id || p.b === id);
-        const partnerId = pair.a === id ? pair.b : pair.a;
-        const partnerName = getSubjectById(partnerId)?.name || partnerId;
-        const isDup = preIds.has(id);
-
-        if (isDup) {
-          distSlots.push({ sub, reason: `반 배정에 따라 '${sub.name}' 배정 (1학기 이수 → 중복)`, status: 'dup_pre' });
-        } else {
-          distSlots.push({ sub, reason: `1학기 '${partnerName}' 이수 → '${sub.name}' 배정`, status: 'assigned' });
-        }
-      }
-    } else {
-      // 반 미정: 모든 쌍 both_missing
-      for (const pair of COMPLEMENT_PAIRS) {
-        const subA = getSubjectById(pair.a);
-        const subB = getSubjectById(pair.b);
-        if (!subA || !subB) continue;
-        distSlots.push({ sub: subA, reason: `'${subA.name}'·'${subB.name}' 모두 미이수 — 반 배정에 따라 결정`, status: 'both_missing' });
-        distSlots.push({ sub: subB, reason: `'${subA.name}'·'${subB.name}' 모두 미이수 — 반 배정에 따라 결정`, status: 'both_missing' });
-      }
+    for (const pair of COMPLEMENT_PAIRS) {
+      const subA = getSubjectById(pair.a);
+      const subB = getSubjectById(pair.b);
+      if (!subA || !subB) continue;
+      distSlots.push({ sub: subA, reason: `'${subA.name}'·'${subB.name}' — 반 배정에 따라 결정`, status: 'both_missing' });
+      distSlots.push({ sub: subB, reason: `'${subA.name}'·'${subB.name}' — 반 배정에 따라 결정`, status: 'both_missing' });
     }
   }
 
@@ -603,9 +566,8 @@ function computeTransferMatching() {
   const transMatchedIds = new Set();
   const transResults = (state.semesterSubjects[transKey] || []).map(sub => {
     const r = autoMatch(sub.name);
-    const isDuplicate = r.matched && r.targets.some(t => preIds.has(t.id));
     if (r.matched) r.targets.forEach(t => transMatchedIds.add(t.id));
-    return { ...sub, ...r, isDuplicate };
+    return { ...sub, ...r, isDuplicate: false };
   });
 
   // 교양 보완쌍 상호 인정: 진로와직업(CA_1) ↔ 생태와환경(EC_1)
@@ -624,7 +586,7 @@ function computeTransferMatching() {
   const fixedSlotStatus = duruFixed.map(slot => ({
     slot,
     matched: transMatchedIds.has(slot.id),
-    preDup:  preIds.has(slot.id),
+    preDup: false,  // 이전 학기 매칭 제거로 항상 false
   }));
 
   const distSlotStatus = distSlots.map(ds => ({
@@ -632,8 +594,9 @@ function computeTransferMatching() {
     matched: ds.sub ? transMatchedIds.has(ds.sub.id) : false,
   }));
 
-  // ⑥ 최종 인정 IDs = 전 학기 + 전입학기 매칭 과목
-  const allIds = new Set(preIds);
+  // ⑥ 최종 allIds = 전입학기 매칭/이수 예정 두루고 과목
+  // (이전 학기는 preCredits로 별도 처리하므로 allIds에 포함 안 함)
+  const allIds = new Set();
   fixedSlotStatus.forEach(({ slot, matched }) => { if (matched) allIds.add(slot.id); });
   distSlotStatus.forEach(({ sub, matched }) => { if (matched && sub) allIds.add(sub.id); });
 
@@ -651,7 +614,7 @@ function computeTransferMatching() {
 
   state.matchResults = {
     type: 'transfer',
-    preSems, preIds,
+    preSems, preCredits,
     transResults, transMatchedIds,
     fixedSlotStatus, distSlotStatus,
     allIds,
@@ -670,30 +633,31 @@ function renderStep3() {
   if (mr.preSems.length > 0) {
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `<div class="card-title">✅ 전입 이전 학기 과목 인정</div>`;
+    const totalPreCredits = mr.preCredits || 0;
+    card.innerHTML = `<div class="card-title">✅ 전입 이전 학기 이수 학점 인정</div>`;
 
     for (const sem of mr.preSems) {
-      const recognized   = sem.subjects.filter(m => m.matched);
-      const unrecognized = sem.subjects.filter(m => !m.matched);
-
       const semDiv = document.createElement("div");
       semDiv.className = "pre-sem-block";
       semDiv.innerHTML = `
-        <div class="pre-sem-header">${sem.year}학년 ${sem.semester}학기 — ${recognized.length}과목 인정</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">
-          ${recognized.map(m => {
-            const targetName = m.targets.map(t => t.name).join(", ");
-            return `<span class="subj-chip pre-chip">${m.name} → ${targetName}(${m.targets[0]?.credits ?? m.credits}학점)</span>`;
-          }).join("")}
+        <div class="pre-sem-header">
+          ${sem.year}학년 ${sem.semester}학기 &nbsp;—&nbsp;
+          <strong>${sem.semCredits}학점</strong> 이수 완료
+          <span style="color:var(--gray-400);font-size:0.8rem;margin-left:6px">(자동 인정)</span>
         </div>
-        ${unrecognized.length > 0 ? `
-          <div class="pre-sem-warn">
-            ⚠️ 미매칭: ${unrecognized.map(m => `${m.name}(${m.credits}학점)`).join(", ")}
-            — 담당 교사 확인 필요
-          </div>` : ''}
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">
+          ${sem.subjects.map(s =>
+            `<span class="subj-chip pre-chip">${s.name}(${s.credits}학점)</span>`
+          ).join("")}
+        </div>
       `;
       card.appendChild(semDiv);
     }
+
+    const totalDiv = document.createElement("div");
+    totalDiv.style.cssText = "margin-top:12px;padding-top:10px;border-top:1px solid var(--gray-200);font-size:0.9rem;color:var(--gray-700)";
+    totalDiv.innerHTML = `합계 <strong>${totalPreCredits}학점</strong> — 졸업 학점 산정에 반영`;
+    card.appendChild(totalDiv);
     preSumEl.appendChild(card);
   }
 
@@ -867,22 +831,13 @@ function calcResults() {
   );
   const toCompleteCollapsed = collapseChoiceGroups(toComplete);
 
-  let recognizedCredits  = alreadyDone.reduce((a, s) => a + s.credits, 0);
+  // 전학생: 이전 학기는 raw preCredits로 인정 (두루고 과목 매칭 없음)
+  // 재학생: 두루고 편제 기준 인정 학점
+  let recognizedCredits = state.userType === 'transfer'
+    ? (state.matchResults.preCredits || 0)
+    : alreadyDone.reduce((a, s) => a + s.credits, 0);
 
-  // 중복이수 학점 추가 (전학생: 이전 학교 + 전입학기에서 동일 과목 이수 시 학점 이중 인정)
-  const dupIds = new Set();
-  if (state.userType === 'transfer' && state.matchResults.transResults) {
-    for (const r of state.matchResults.transResults) {
-      if (r.isDuplicate && r.matched) {
-        for (const t of r.targets) {
-          if (state.matchResults.preIds.has(t.id) && !dupIds.has(t.id)) {
-            dupIds.add(t.id);
-            recognizedCredits += t.credits;
-          }
-        }
-      }
-    }
-  }
+  const dupIds = new Set(); // 중복이수는 이전학기 매칭 제거로 더 이상 발생 안 함
 
   // 전학생: 남은 두루고 이수 가능 학점 = 학기당 학점 합계 (1학년 31, 2학년 29, 3학년 27)
   // selectionPool 과목 중복 합산을 방지하기 위해 편제 상 학기별 학점 기준으로 계산
