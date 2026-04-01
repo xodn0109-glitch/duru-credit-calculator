@@ -547,8 +547,11 @@ function computeTransferMatching() {
     preSems.push({ year, semester: s, subjects });
   }
 
-  // ② 두루고 전입학기 고정 과목 (semester 고정)
-  const duruFixed = DURU_SUBJECTS.filter(s => s.year === grade && s.semester === semester);
+  // ② 두루고 전입학기 고정 과목 (학교 지정 필수 과목만 — selectionPool·choiceGroup 없는 것)
+  // 선택과목(selectionPool)은 학생이 입력한 것만 처리하므로 여기서 제외
+  const duruFixed = DURU_SUBJECTS.filter(s =>
+    s.year === grade && s.semester === semester && !s.selectionPool && !s.choiceGroup
+  );
 
   // ③ 분산배치 반 그룹 결정 (1학년만 해당)
   // 두루고 분산배치는 반 단위로 교차: 기가 반(A그룹)↔정보 반(B그룹)
