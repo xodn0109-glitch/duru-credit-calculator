@@ -640,6 +640,10 @@ function computeTransferMatching() {
   fixedSlotStatus
     .forEach(({ slot }) => allIds.add(slot.id));
 
+  // 전입학기 학생이 선택한 선택과목도 이수 예정으로 allIds에 추가
+  // (정상적으로 학교를 다닐 것으로 가정)
+  transMatchedIds.forEach(id => allIds.add(id));
+
   state.matchResults = {
     type: 'transfer',
     preSems, preIds,
