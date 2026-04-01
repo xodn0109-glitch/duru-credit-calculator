@@ -931,6 +931,18 @@ function renderStep4() {
   // 영역별 현황
   const areaBody = document.getElementById("area-table-body");
   areaBody.innerHTML = "";
+
+  // 전학생 안내: 이전 학교 학점은 영역별로 매핑 불가
+  const areaNote = document.getElementById("area-transfer-note");
+  if (areaNote) areaNote.remove();
+  if (!isCurrent) {
+    const note = document.createElement("div");
+    note.id = "area-transfer-note";
+    note.style.cssText = "font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px";
+    note.innerHTML = `ℹ️ 아래 영역별 현황은 <strong>두루고 이수 예정 과목 기준</strong>입니다. 이전 학교 이수 학점(${res.recognizedCredits}학점)은 영역별로 분류할 수 없으므로 포함되지 않습니다.`;
+    areaBody.closest("table")?.parentElement?.insertBefore(note, areaBody.closest("table"));
+  }
+
   for (const [code, st] of Object.entries(res.areaStatus)) {
     if (st.required === 0 && st.done === 0) continue;
     const pctArea = st.required > 0 ? Math.min(100, Math.round(st.done / st.required * 100)) : 100;
@@ -1067,7 +1079,11 @@ function renderAlternativePaths(res) {
   section.innerHTML = "";
 
   // 두루고 편제 과목을 모두 이수해도 졸업 요건 미충족 여부 확인
-  const hasAreaShortfall = Object.values(res.areaStatus).some(st => st.required > 0 && (st.done + st.remain) < st.required);
+  // 전학생: 이전 학교 학점이 영역별 미반영이므로 영역 부족 판단 불가 → 총학점만 기준
+  const isCur = state.userType === 'current';
+  const hasAreaShortfall = isCur
+    ? Object.values(res.areaStatus).some(st => st.required > 0 && (st.done + st.remain) < st.required)
+    : false;
   const needsExtra = !res.graduationReady || hasAreaShortfall;
 
   const div = document.createElement("div");
@@ -1099,12 +1115,15 @@ function renderWarnings(res) {
   const isCurrent = state.userType === 'current';
   const warnings = [];
 
-  for (const [code, st] of Object.entries(res.areaStatus)) {
-    if (st.required > 0 && st.done < st.required) {
-      warnings.push({
-        level: "error",
-        msg: `<strong>${st.name}</strong> 영역 최소 이수 학점 미달 (필요 ${st.required}학점, ${isCurrent ? "이수" : "인정"} ${st.done}학점 — ${st.required - st.done}학점 부족)`,
-      });
+  // 영역별 경고: 전학생은 이전 학교 학점이 영역별 미반영이므로 경고 생략
+  if (isCurrent) {
+    for (const [code, st] of Object.entries(res.areaStatus)) {
+      if (st.required > 0 && st.done < st.required) {
+        warnings.push({
+          level: "error",
+          msg: `<strong>${st.name}</strong> 영역 최소 이수 학점 미달 (필요 ${st.required}학점, 이수 ${st.done}학점 — ${st.required - st.done}학점 부족)`,
+        });
+      }
     }
   }
 
