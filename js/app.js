@@ -131,7 +131,7 @@ function renderStep2() {
       state.semesterSubjects[key] = getInitialSubjects(year, s);
     }
 
-    const statusLabel = isTransferSem ? "📌 전입 학기"
+    const statusLabel = isTransferSem ? "🏫 두루고 이수 시작"
                       : isCurrentSem  ? "📌 현재 학기"
                       : "✅ 이수 완료";
     const statusClass = (isTransferSem || isCurrentSem) ? "current" : "past";
@@ -145,7 +145,7 @@ function renderStep2() {
         <span class="sem-status-badge ${statusClass}">${statusLabel}</span>
         <span id="sem-total-${key}" style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-left:8px">총 0학점</span>
         ${isTransferSem
-          ? `<span style="font-size:0.75rem;color:var(--primary);margin-left:auto;white-space:nowrap">이전 학교에서 이수한 과목 입력</span>`
+          ? `<span style="font-size:0.75rem;color:var(--primary);margin-left:auto;white-space:nowrap">두루고에서 이수할 과목 입력</span>`
           : ''}
       </div>
       <div class="sem-body">
