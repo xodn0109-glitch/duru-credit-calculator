@@ -884,9 +884,34 @@ function calcResults() {
     }
   }
 
-  const subjectTarget      = GRADUATION_REQUIREMENTS.subjectCredits;
-  const stillNeededSubject = Math.max(0, subjectTarget - recognizedCredits);
-  const totalExpected      = recognizedCredits + stillNeededSubject + ACTIVITY_CREDITS;
+  // 전학생: 남은 두루고 이수 가능 학점 = 학기당 학점 합계 (1학년 31, 2학년 29, 3학년 27)
+  // selectionPool 과목 중복 합산을 방지하기 위해 편제 상 학기별 학점 기준으로 계산
+  const { grade: curGrade, semester: curSem } = state.studentInfo;
+
+  let remainCredits;
+  if (state.userType === 'transfer') {
+    let durugoCapacity = 0;
+    for (let g = curGrade; g <= 3; g++) {
+      const startS = (g === curGrade) ? curSem : 1;
+      for (let s = startS; s <= 2; s++) {
+        durugoCapacity += GRADUATION_REQUIREMENTS.creditsPerSemester[g];
+      }
+    }
+    remainCredits = durugoCapacity;
+  } else {
+    remainCredits = toCompleteCollapsed.reduce((a, s) => a + s.credits, 0);
+  }
+
+  const totalExpected  = recognizedCredits + remainCredits + ACTIVITY_CREDITS;
+
+  // 영역별 breakdown용: 수강 가능한 과목 목록 (selectionPool 과목 포함하므로 합계는 상한값)
+  const reachableToComplete = state.userType === 'transfer'
+    ? toCompleteCollapsed.filter(s =>
+        (s.year === 1 && s.semester === null) ||
+        s.year > curGrade ||
+        (s.year === curGrade && s.semester >= curSem)
+      )
+    : toCompleteCollapsed;
 
   const mandatoryToComplete = toCompleteCollapsed.filter(s => s.type === "common");
   const electiveToComplete  = toCompleteCollapsed.filter(s => s.type !== "common");
@@ -900,7 +925,7 @@ function calcResults() {
       const sub = getSubjectById(id);
       if (sub && sub.area === code) done += sub.credits;
     }
-    const remain = toCompleteCollapsed.filter(s => s.area === code).reduce((a, s) => a + s.credits, 0);
+    const remain = reachableToComplete.filter(s => s.area === code).reduce((a, s) => a + s.credits, 0);
     areaStatus[code] = { name, required, done, remain };
   }
 
@@ -910,7 +935,7 @@ function calcResults() {
     : [];
 
   return {
-    recognizedIds, recognizedCredits, stillNeededSubject, totalExpected, alreadyDone,
+    recognizedIds, recognizedCredits, remainCredits, totalExpected, alreadyDone,
     toComplete, toCompleteCollapsed, mandatoryToComplete, electiveToComplete,
     areaStatus, unresolvable,
     graduationReady: totalExpected >= GRADUATION_REQUIREMENTS.totalCredits,
@@ -931,18 +956,18 @@ function renderStep4() {
     ? "재학생"
     : `전입 ${state.studentInfo.grade}학년 ${state.studentInfo.semester}학기`;
   document.getElementById("result-recognized").textContent = res.recognizedCredits;
-  document.getElementById("result-remaining").textContent  = res.stillNeededSubject;
+  document.getElementById("result-remaining").textContent  = res.remainCredits;
   document.getElementById("result-total").textContent      = res.totalExpected;
   document.getElementById("progress-bar-fill").style.width = pct + "%";
   document.getElementById("progress-bar-pct").textContent  = pct + "%";
-  document.getElementById("progress-need").textContent     = res.stillNeededSubject;
+  document.getElementById("progress-need").textContent     = res.remainCredits;
   document.getElementById("label-recognized").textContent  = "인정 학점";
 
   const statusEl = document.getElementById("graduation-status");
   const totalGap = GRADUATION_REQUIREMENTS.totalCredits - res.totalExpected;
   if (totalGap <= 0) {
     statusEl.className = "grad-status grad-ok";
-    statusEl.innerHTML = `✅ 계획대로 이수 시 졸업 요건 192학점 충족 — 남은 교과 학점 <strong>${res.stillNeededSubject}학점</strong> 이수 필요`;
+    statusEl.innerHTML = `✅ 계획대로 이수 시 졸업 요건 192학점 충족 — 남은 교과 학점 <strong>${res.remainCredits}학점</strong> 이수 필요`;
   } else {
     statusEl.className = "grad-status grad-warn";
     statusEl.innerHTML = `⚠️ 현재 ${isCurrent ? "이수" : "인정"} 교과 학점 ${res.recognizedCredits}학점으로는 <strong>${totalGap}학점 부족</strong> — 아래 과목 이수 계획 필수`;
