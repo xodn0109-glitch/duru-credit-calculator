@@ -128,7 +128,7 @@ function renderStep2() {
 
     // 초기 과목 세팅
     if (!state.semesterSubjects[key]) {
-      state.semesterSubjects[key] = getInitialSubjects(year, s);
+      state.semesterSubjects[key] = getInitialSubjects(year, s, isTransferSem);
     }
 
     const statusLabel = isTransferSem ? "🏫 두루고 이수 시작"
@@ -224,8 +224,8 @@ function renderStep2() {
 // 학기 초기 과목 (재학생: 선택 없이 전원 필수 이수 과목 자동 채움)
 // selectionPool·choiceGroup이 모두 없는 과목 = 학교 지정 고정 과목
 // locked: false → 미이수 처리 시 사용자가 직접 삭제 가능
-function getInitialSubjects(year, s) {
-  if (state.userType !== 'current') return [];
+function getInitialSubjects(year, s, isTransferSem = false) {
+  if (state.userType !== 'current' && !isTransferSem) return [];
   return DURU_SUBJECTS
     .filter(sub => sub.year === year && sub.semester === s && !sub.selectionPool && !sub.choiceGroup)
     .map(sub => ({ name: sub.name, credits: sub.credits, locked: false }));
