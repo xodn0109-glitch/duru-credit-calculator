@@ -587,7 +587,7 @@ const AREA_NAMES = {
   social:  "사회",
   science: "과학",
   pe:      "체육",
-  arts:    "예술(음악·미술)",
+  arts:    "예술",
   others:  "기가/정보/제2외국어/한문/교양",
 };
 
