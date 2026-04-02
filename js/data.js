@@ -579,6 +579,36 @@ const SUBJECT_ALIASES = [
              "베트남어 독해와 작문Ⅱ","베트남어독해와작문2","심화 베트남어","심화베트남어"], targetIds:["L2_CN4"] },
 ];
 
+// ============================================================
+// 두루고 편제에 없으나 세종시 교육청 편제 가능 과목 (영역 분류 전용)
+// DURU_SUBJECTS 매핑 없이 area 코드만 반환 → preAreaCredits 분류에 사용
+// ============================================================
+const SUBJECT_AREA_ONLY = [
+  // 교양 (others)
+  { aliases: ["보건"],                                              area: "others" },
+  { aliases: ["논술"],                                              area: "others" },
+  { aliases: ["인간과철학", "인간과 철학"],                         area: "others" },
+  { aliases: ["논리와사고", "논리와 사고"],                         area: "others" },
+  { aliases: ["인간과심리", "인간과 심리"],                         area: "others" },
+  { aliases: ["교육의이해", "교육의 이해"],                         area: "others" },
+  { aliases: ["삶과종교", "삶과 종교"],                             area: "others" },
+  { aliases: ["인간과경제활동", "인간과 경제활동"],                 area: "others" },
+
+  // 기술·가정 추가 과목 (others)
+  { aliases: ["창의공학설계", "창의 공학 설계"],                    area: "others" },
+  { aliases: ["로봇과공학세계", "로봇과 공학세계"],                 area: "others" },
+  { aliases: ["생활과학탐구", "생활과학 탐구"],                     area: "others" },
+  { aliases: ["지식재산일반", "지식 재산 일반"],                    area: "others" },
+  { aliases: ["생애설계와자립", "생애 설계와 자립"],                area: "others" },
+  { aliases: ["아동발달과부모", "아동발달과 부모"],                  area: "others" },
+
+  // 정보 추가 과목 (others)
+  { aliases: ["데이터과학", "데이터 과학"],                         area: "others" },
+
+  // 예술 추가 과목 (arts)
+  { aliases: ["연극"],                                              area: "arts" },
+];
+
 // 교과 영역 한글 이름
 const AREA_NAMES = {
   korean:  "국어",

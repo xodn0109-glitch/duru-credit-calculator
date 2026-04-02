@@ -60,6 +60,15 @@ function autoMatch(subjectName) {
   );
   if (partial.length > 0) return { matched: true, targets: partial, method: "partial" };
 
+  // 두루고 편제에 없으나 세종시 교육청 편제 가능 과목 (영역 분류 전용)
+  for (const entry of SUBJECT_AREA_ONLY) {
+    for (const alias of entry.aliases) {
+      if (normalize(alias) === norm) {
+        return { matched: true, targets: [{ area: entry.area }], method: "area_only" };
+      }
+    }
+  }
+
   return { matched: false, targets: [], method: "none" };
 }
 
