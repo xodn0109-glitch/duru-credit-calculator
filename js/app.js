@@ -658,6 +658,26 @@ function renderStep3() {
     totalDiv.style.cssText = "margin-top:12px;padding-top:10px;border-top:1px solid var(--gray-200);font-size:0.9rem;color:var(--gray-700)";
     totalDiv.innerHTML = `합계 <strong>${totalPreCredits}학점</strong> — 졸업 학점 산정에 반영`;
     card.appendChild(totalDiv);
+
+    // 두루고 동기간 편제 학점과 비교
+    const durugoEquiv = mr.preSems.reduce((acc, sem) =>
+      acc + (GRADUATION_REQUIREMENTS.creditsPerSemester[sem.year] || 0), 0);
+    const diff = totalPreCredits - durugoEquiv;
+    let compColor, compIcon, compText;
+    if (diff < 0) {
+      compColor = "#dc2626"; compIcon = "⬇";
+      compText = `두루고 동기간 편제 학점(${durugoEquiv}학점)보다 <strong>${Math.abs(diff)}학점 적음</strong> — 졸업 학점 확보에 영향`;
+    } else if (diff > 0) {
+      compColor = "#16a34a"; compIcon = "⬆";
+      compText = `두루고 동기간 편제 학점(${durugoEquiv}학점)보다 <strong>${diff}학점 많음</strong>`;
+    } else {
+      compColor = "#2563eb"; compIcon = "＝";
+      compText = `두루고 동기간 편제 학점(${durugoEquiv}학점)과 <strong>동일</strong>`;
+    }
+    const compDiv = document.createElement("div");
+    compDiv.style.cssText = `margin-top:8px;padding:8px 12px;border-radius:8px;background:#f8fafc;border-left:3px solid ${compColor};font-size:0.82rem;color:var(--gray-700)`;
+    compDiv.innerHTML = `<span style="color:${compColor};font-weight:700;margin-right:6px">${compIcon} 두루고 비교</span>${compText}`;
+    card.appendChild(compDiv);
     preSumEl.appendChild(card);
   }
 
