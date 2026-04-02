@@ -572,18 +572,17 @@ function computeCurrentMatching() {
   state.matchResults = { type: 'current', recognizedIds, semResults };
 }
 
-// 전학생: 전입 이전 학기 인정 + 전입 학기 편제 매칭
+// 전학생: 전입 이전 학기 인정 + 전입 학기 교과군 기준 매칭
 function computeTransferMatching() {
   const { grade, semester } = state.studentInfo;
   const sems = getSemesters(grade, semester);
 
-  // ① 전입 이전 학기: 학점 합산 + 영역별 분류
-  // 총 학점(preCredits)은 raw 합산, 영역별(preAreaCredits)은 autoMatch로 area 추출
+  // ① 전입 이전 학기: 학점 합산 + 영역별 분류 (매칭 없이 그대로 인정)
   let preCredits = 0;
-  const preAreaCredits = {}; // { area코드: 학점 } — autoMatch 성공분
-  const preUnmatchedSubs = []; // autoMatch 실패 → 수동 영역 지정 대상
+  const preAreaCredits = {};
+  const preUnmatchedSubs = [];
   const preSems = [];
-  let unmatchedIdx = 0; // key 고유성 보장용 전역 인덱스
+  let unmatchedIdx = 0;
   for (const { year, semester: s } of sems) {
     if (year === grade && s === semester) break;
     const key = `${year}-${s}`;
@@ -596,91 +595,64 @@ function computeTransferMatching() {
         const area = r.targets[0].area;
         if (area) preAreaCredits[area] = (preAreaCredits[area] || 0) + sub.credits;
       } else {
-        // 인덱스 포함해 key 완전 고유성 보장 (같은 이름+학점+학기 중복도 구분)
         preUnmatchedSubs.push({ name: sub.name, credits: sub.credits, year, semester: s, idx: unmatchedIdx++ });
       }
     }
     preSems.push({ year, semester: s, subjects, semCredits });
   }
 
-  // ② 두루고 전입학기 고정 과목 (매칭 후 재구성 — 아래 ④ 이후에 확정)
-  let duruFixed = [];
+  // ② 전입 학기 이전 학교 과목 → 교과군(area) 분류
+  const transKey = `${grade}-${semester}`;
+  const prevPool = (state.semesterSubjects[transKey] || []).map(sub => {
+    const r = autoMatch(sub.name);
+    const area = (r.matched && r.targets.length > 0) ? r.targets[0].area : null;
+    return { name: sub.name, credits: sub.credits, area, used: false };
+  });
 
-  // ③ 분산배치 반 그룹 결정 (1학년만 해당)
-  // 이전 학교 과목 매칭 정보 없으므로 전입 전학생은 항상 반 배정에 따라 결정
-  const distSlots = [];
+  // ③ 전입 학기 두루고 과목 (학교지정 필수 + 학생 선택)
+  const duruKey = `duru-${grade}-${semester}`;
+  const duruSubs = (state.semesterSubjects[duruKey] || []).map(sub => {
+    const found = DURU_SUBJECTS.find(s => normalize(s.name) === normalize(sub.name));
+    return {
+      name: sub.name,
+      credits: sub.credits,
+      area: found ? found.area : null,
+      id:   found ? found.id   : null,
+      locked: sub.locked || false,
+    };
+  });
+
+  // ④ 교과군 기준 1:1 매칭
+  // 두루고 과목 각각에 대해 같은 교과군의 미사용 이전학교 과목을 찾아 연결
+  const matchPairs = duruSubs.map(duruSub => {
+    if (!duruSub.area) return { duruSub, prevSub: null, matched: false };
+    const prev = prevPool.find(p => !p.used && p.area === duruSub.area);
+    if (prev) {
+      prev.used = true;
+      return { duruSub, prevSub: prev, matched: true };
+    }
+    return { duruSub, prevSub: null, matched: false };
+  });
+
+  // 이전 학교 과목 중 두루고에 대응 슬롯이 없어 이수 중단된 과목
+  const prevDiscarded = prevPool.filter(p => !p.used);
+
+  // ⑤ allIds: 두루고 전입학기 과목 전체 (매칭 여부 무관 — 모두 두루고에서 이수)
+  const allIds = new Set();
+  duruSubs.forEach(s => { if (s.id) allIds.add(s.id); });
+
+  // 1학년 전입 시 분산배치 과목도 allIds에 포함
   if (grade === 1) {
     for (const pair of COMPLEMENT_PAIRS) {
-      const subA = getSubjectById(pair.a);
-      const subB = getSubjectById(pair.b);
-      if (!subA || !subB) continue;
-      distSlots.push({ sub: subA, reason: `'${subA.name}'·'${subB.name}' — 반 배정에 따라 결정`, status: 'both_missing' });
-      distSlots.push({ sub: subB, reason: `'${subA.name}'·'${subB.name}' — 반 배정에 따라 결정`, status: 'both_missing' });
+      [pair.a, pair.b].forEach(id => allIds.add(id));
     }
   }
-
-  // ④ 전입학기 과목 매칭
-  const transKey = `${grade}-${semester}`;
-  const transMatchedIds = new Set();
-  const transResults = (state.semesterSubjects[transKey] || []).map(sub => {
-    const r = autoMatch(sub.name);
-    if (r.matched) r.targets.forEach(t => { if (t.id) transMatchedIds.add(t.id); });
-    return { ...sub, ...r, isDuplicate: false };
-  });
-
-  // ④-a 두루고 이수 희망 선택과목도 transMatchedIds에 추가
-  // (이전 학교 매칭과 무관하게 학생이 직접 선택한 두루고 과목)
-  const duruElectKey = `duru-${grade}-${semester}`;
-  (state.semesterSubjects[duruElectKey] || []).forEach(sub => {
-    const r = autoMatch(sub.name);
-    if (r.matched) r.targets.forEach(t => { if (t.id) transMatchedIds.add(t.id); });
-  });
-
-  // 교양 보완쌍 상호 인정: 진로와직업(CA_1) ↔ 생태와환경(EC_1)
-  if (transMatchedIds.has('CA_1')) transMatchedIds.add('EC_1');
-  if (transMatchedIds.has('EC_1')) transMatchedIds.add('CA_1');
-
-  // ④-b 두루고 전입학기 과목 확정: 필수 과목 + 학생이 선택한 과목
-  // 필수 과목(selectionPool·choiceGroup 없는 것)은 항상 포함
-  // 선택과목은 학생이 실제 입력하여 매칭된 것만 포함 (미선택 과목은 제외)
-  duruFixed = DURU_SUBJECTS.filter(s =>
-    s.year === grade && s.semester === semester &&
-    ((!s.selectionPool && !s.choiceGroup) || transMatchedIds.has(s.id))
-  );
-
-  // ⑤ 슬롯별 매칭 상태 판정
-  const fixedSlotStatus = duruFixed.map(slot => ({
-    slot,
-    matched: transMatchedIds.has(slot.id),
-    preDup: false,  // 이전 학기 매칭 제거로 항상 false
-  }));
-
-  const distSlotStatus = distSlots.map(ds => ({
-    ...ds,
-    matched: ds.sub ? transMatchedIds.has(ds.sub.id) : false,
-  }));
-
-  // ⑥ 최종 allIds = 전입학기 매칭/이수 예정 두루고 과목
-  // (이전 학기는 preCredits로 별도 처리하므로 allIds에 포함 안 함)
-  const allIds = new Set();
-
-  // 두루고 배정 슬롯(비매칭 포함)도 인정 IDs에 추가
-  // (비매칭 = 두루고에서 새로 이수할 과목이므로 편제상 포함)
-  distSlotStatus
-    .filter(ds => (ds.status === 'assigned' || ds.status === 'both_missing') && ds.sub)
-    .forEach(ds => allIds.add(ds.sub.id));
-  fixedSlotStatus
-    .forEach(({ slot }) => allIds.add(slot.id));
-
-  // 전입학기 학생이 선택한 선택과목도 이수 예정으로 allIds에 추가
-  // (정상적으로 학교를 다닐 것으로 가정)
-  transMatchedIds.forEach(id => allIds.add(id));
 
   state.matchResults = {
     type: 'transfer',
     preSems, preCredits, preAreaCredits, preUnmatchedSubs,
-    transResults, transMatchedIds,
-    fixedSlotStatus, distSlotStatus,
+    matchPairs,      // [{duruSub, prevSub, matched}] — 전입학기 매칭 결과
+    prevDiscarded,   // 이전학교 이수 중단 과목
     allIds,
   };
 }
@@ -794,105 +766,63 @@ function renderStep3() {
     }
   }
 
-  // ── 전입학기 두루고 편제 매칭 ──
+  // ── 전입학기 매칭 결과표 ──
   const transEl = document.getElementById("transfer-matching");
   transEl.innerHTML = "";
+
+  const { matchPairs, prevDiscarded } = mr;
+  const matchedCount   = matchPairs.filter(p => p.matched).length;
+  const unmatchedCount = matchPairs.filter(p => !p.matched).length;
 
   const card2 = document.createElement("div");
   card2.className = "card";
   card2.innerHTML = `
-    <div class="card-title">🔀 두루고 ${grade}학년 ${semester}학기 편제 매칭</div>
+    <div class="card-title">🔀 ${grade}학년 ${semester}학기 과목 매칭</div>
     <p style="font-size:0.83rem;color:var(--gray-500);margin-bottom:14px">
-      이전 학교 과목이 두루고 ${grade}학년 ${semester}학기 편제 슬롯과 어떻게 연결되는지 확인하세요.
+      같은 교과군 과목끼리 매칭됩니다.
+      매칭된 과목은 이전 학교 이수로 인정되며, 비매칭 과목은 두루고에서 새로 이수합니다.
     </p>
   `;
 
-  // 고정 과목 슬롯
-  const fixedWrap = document.createElement("div");
-  fixedWrap.innerHTML = `<div class="slot-section-title">두루고 편제 과목 매칭</div>`;
-
-  for (const { slot, matched, preDup } of mr.fixedSlotStatus) {
-    fixedWrap.appendChild(makeSlotRow(slot, matched, preDup, mr, '중복이수'));
-  }
-  card2.appendChild(fixedWrap);
-
-  // 분산배치 슬롯
-  if (mr.distSlotStatus.length > 0) {
-    const distWrap = document.createElement("div");
-    distWrap.style.marginTop = "18px";
-    distWrap.innerHTML = `<div class="slot-section-title">분산배치 과목 (교차이수 보완쌍)</div>`;
-
-    // both_missing 쌍에서 한쪽이 매칭되면 파트너(미매칭) 숨김
-    const bothMissingMatchedIds = new Set(
-      mr.distSlotStatus
-        .filter(ds => ds.status === 'both_missing' && ds.matched && ds.sub)
-        .map(ds => ds.sub.id)
-    );
-
-    for (const ds of mr.distSlotStatus) {
-      if (!ds.sub) continue;
-      const isDupPre = ds.status === 'dup_pre';
-      const isBothMissing = ds.status === 'both_missing';
-      // both_missing이고 미매칭인데, 쌍 파트너가 이미 매칭됐으면 이 슬롯 숨김
-      if (isBothMissing && !ds.matched) {
-        const pair = COMPLEMENT_PAIRS.find(p => p.a === ds.sub.id || p.b === ds.sub.id);
-        if (pair) {
-          const partnerId = pair.a === ds.sub.id ? pair.b : pair.a;
-          if (bothMissingMatchedIds.has(partnerId)) continue;
-          if (pair.b === ds.sub.id) continue; // secondary(subB)는 미매칭 시 항상 숨김
-        }
-      }
-      const row = makeSlotRow(ds.sub, ds.matched, isDupPre, mr, isDupPre ? '중복이수' : null);
-      // 이유 태그 추가
-      const badge = row.querySelector(".match-method");
-      if (!badge) {
-        const reasonTag = document.createElement("span");
-        reasonTag.className = "match-method";
-        reasonTag.textContent = ds.reason;
-        row.querySelector(".match-target").appendChild(reasonTag);
-      }
-      distWrap.appendChild(row);
-    }
-    card2.appendChild(distWrap);
-  }
-
-  // 매칭 안 된 전출교 과목
-  const unmatched = mr.transResults.filter(r => !r.matched);
-  if (unmatched.length > 0) {
-    const warnDiv = document.createElement("div");
-    warnDiv.className = "unmatched-warn-block";
-    warnDiv.innerHTML = `
-      <div style="font-weight:700;font-size:0.85rem;margin-bottom:6px">⚠️ 두루고 편제와 매칭되지 않은 과목</div>
-      <div>${unmatched.map(m => `<span class="subj-chip" style="background:var(--warn-light);color:var(--warn);border:1px solid #fde68a">${m.name}(${m.credits}학점)</span>`).join("")}</div>
-      <div style="font-size:0.78rem;color:var(--gray-600);margin-top:8px">담당 교사와 인정 여부를 확인하세요.</div>
-    `;
-    card2.appendChild(warnDiv);
-  }
-
-  // 중복이수 경고
-  const dupSubjects = mr.transResults.filter(r => r.isDuplicate);
-  if (dupSubjects.length > 0) {
-    const dupDiv = document.createElement("div");
-    dupDiv.className = "dup-warn-block";
-    const dupLines = dupSubjects.map(m => {
-      const chip = `<span class="subj-chip" style="background:#fef9c3;color:#92400e;border:1px solid #fde68a">${m.name}(${m.credits}학점)</span>`;
-      const targets = (m.targets || []);
-      const mappedTarget = targets.find(t => t.name !== m.name);
-      if (mappedTarget) {
-        return `<div style="margin-bottom:4px">${chip} <span style="color:var(--gray-600);font-size:0.78rem">→ <b>${mappedTarget.name}</b>으로 인정되어 중복이수</span></div>`;
-      } else if (targets.length > 0) {
-        return `<div style="margin-bottom:4px">${chip} <span style="color:var(--gray-600);font-size:0.78rem">→ 동일 과목 중복이수</span></div>`;
-      }
-      return `<div style="margin-bottom:4px">${chip}</div>`;
-    }).join("");
-    dupDiv.innerHTML = `
-      <div style="font-weight:700;font-size:0.85rem;margin-bottom:8px">🔁 중복 이수 과목</div>
-      ${dupLines}
-      <div style="font-size:0.78rem;color:var(--gray-600);margin-top:4px">교과 총점(국·영·수 등) 한도 초과 여부를 확인하세요.</div>
-    `;
-    card2.appendChild(dupDiv);
-  }
-
+  // 매칭 결과 테이블
+  const tableHtml = `
+    <table style="width:100%;border-collapse:collapse;font-size:0.88rem">
+      <thead>
+        <tr style="background:var(--gray-50);font-size:0.8rem;color:var(--gray-500)">
+          <th style="padding:8px 10px;text-align:left;border-bottom:2px solid var(--gray-200)">이전 학교 과목</th>
+          <th style="padding:8px 6px;text-align:center;width:72px;border-bottom:2px solid var(--gray-200)">매칭</th>
+          <th style="padding:8px 10px;text-align:left;border-bottom:2px solid var(--gray-200)">두루고 과목</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${matchPairs.map(({ prevSub, duruSub, matched }) => {
+          const prevCell = prevSub
+            ? `<strong>${prevSub.name}</strong> <span style="color:var(--gray-400)">(${prevSub.credits}학점)</span>`
+            : `<span style="color:var(--gray-400);font-style:italic">해당 없음</span>`;
+          const duruCell = `<strong>${duruSub.name}</strong> <span style="color:var(--gray-400)">(${duruSub.credits}학점)</span>`;
+          const badge = matched
+            ? `<span class="badge badge-match">매칭</span>`
+            : `<span class="badge badge-nomatch">비매칭</span>`;
+          return `<tr style="border-bottom:1px solid var(--gray-100)">
+            <td style="padding:8px 10px">${prevCell}</td>
+            <td style="padding:8px 6px;text-align:center">${badge}</td>
+            <td style="padding:8px 10px">${duruCell}</td>
+          </tr>`;
+        }).join('')}
+        ${prevDiscarded.map(p => `
+          <tr style="border-bottom:1px solid var(--gray-100);opacity:0.55">
+            <td style="padding:8px 10px"><strong>${p.name}</strong> <span style="color:var(--gray-400)">(${p.credits}학점)</span></td>
+            <td style="padding:8px 6px;text-align:center"><span style="font-size:0.75rem;color:var(--gray-400)">이수 중단</span></td>
+            <td style="padding:8px 10px;color:var(--gray-400);font-style:italic">—</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:0.8rem;color:var(--gray-500);text-align:right">
+      매칭 ${matchedCount}과목 · 비매칭 ${unmatchedCount}과목
+      ${prevDiscarded.length > 0 ? ` · 이수 중단 ${prevDiscarded.length}과목` : ''}
+    </div>
+  `;
+  card2.innerHTML += tableHtml;
   transEl.appendChild(card2);
 }
 
@@ -1028,9 +958,9 @@ function calcResults() {
     areaStatus[code] = { name, required, done, remain };
   }
 
-  // 전학생 비매칭 과목 (두루고 편제에 없는 것)
+  // 전학생 비매칭 과목 (두루고 편제에 없는 것 — 신규 이수 필요)
   const unresolvable = state.userType === 'transfer'
-    ? (state.matchResults.transResults || []).filter(m => !m.matched && !m.isDuplicate)
+    ? (state.matchResults.matchPairs || []).filter(p => !p.matched).map(p => p.duruSub)
     : [];
 
   return {
