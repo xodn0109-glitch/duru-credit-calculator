@@ -148,7 +148,7 @@ function renderStep2() {
         <span class="sem-status-badge ${statusClass}">${statusLabel}</span>
         <span id="sem-total-${key}" style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-left:8px">총 0학점</span>
         ${isTransferSem
-          ? `<span style="font-size:0.75rem;color:var(--primary);margin-left:auto;white-space:nowrap">두루고에서 이수할 과목 입력</span>`
+          ? `<span style="font-size:0.75rem;color:var(--primary);margin-left:auto;white-space:nowrap">이전 학교에서 이수한 과목 입력 (두루고 편제와 매칭됩니다)</span>`
           : ''}
       </div>
       <div class="sem-body">
@@ -228,7 +228,9 @@ function renderStep2() {
 // selectionPool·choiceGroup이 모두 없는 과목 = 학교 지정 고정 과목
 // locked: false → 미이수 처리 시 사용자가 직접 삭제 가능
 function getInitialSubjects(year, s, isTransferSem = false) {
-  if (state.userType !== 'current' && !isTransferSem) return [];
+  // 재학생만 두루고 편제 과목 자동 채움
+  // 전학생(전입 학기 포함)은 이전 학교 과목을 직접 입력해야 하므로 빈 칸으로 시작
+  if (state.userType !== 'current') return [];
   return DURU_SUBJECTS
     .filter(sub => sub.year === year && sub.semester === s && !sub.selectionPool && !sub.choiceGroup)
     .map(sub => ({ name: sub.name, credits: sub.credits, locked: false }));
