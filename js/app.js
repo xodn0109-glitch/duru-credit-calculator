@@ -151,9 +151,12 @@ function renderStep2() {
     const block = document.createElement("div");
     block.className = `sem-block ${statusClass}`;
 
+    // 전입학기 두루고 수강 과목: 처음 진입 시 학교지정 필수과목 자동 채움
     const duruKey = `duru-${key}`;
     if (isTransferSem && !state.semesterSubjects[duruKey]) {
-      state.semesterSubjects[duruKey] = [];
+      state.semesterSubjects[duruKey] = DURU_SUBJECTS
+        .filter(sub => sub.year === year && sub.semester === s && !sub.selectionPool && !sub.choiceGroup)
+        .map(sub => ({ name: sub.name, credits: sub.credits, locked: true }));
     }
 
     block.innerHTML = `
@@ -162,33 +165,32 @@ function renderStep2() {
         <span class="sem-status-badge ${statusClass}">${statusLabel}</span>
         <span id="sem-total-${key}" style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-left:8px">총 0학점</span>
       </div>
-      <div class="sem-body">
-        ${isTransferSem ? `<p style="font-size:0.78rem;color:var(--gray-500);margin:0 0 6px">① 이전 학교 수강 과목 <span style="color:var(--primary)">(두루고 편제와 매칭됩니다)</span></p>` : ''}
-        <table class="subj-input-table">
-          <thead>
-            <tr>
+      <div class="sem-body" ${isTransferSem ? 'style="display:grid;grid-template-columns:1fr 1fr;gap:16px"' : ''}>
+        <div>
+          ${isTransferSem ? `<p style="font-size:0.78rem;font-weight:600;color:var(--gray-600);margin:0 0 6px">① 이전 학교 수강 과목</p>` : ''}
+          <table class="subj-input-table">
+            <thead><tr>
               <th>과목명</th>
               <th style="width:76px">학점</th>
               <th style="width:34px"></th>
-            </tr>
-          </thead>
-          <tbody id="tbody-${key}"></tbody>
-        </table>
-        <button class="btn-add btn-add-row" id="btn-add-${key}">+ 과목 추가</button>
+            </tr></thead>
+            <tbody id="tbody-${key}"></tbody>
+          </table>
+          <button class="btn-add btn-add-row" id="btn-add-${key}">+ 과목 추가</button>
+        </div>
         ${isTransferSem ? `
-        <div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--gray-200)">
-          <p style="font-size:0.78rem;color:var(--gray-500);margin:0 0 6px">② 두루고 이수 희망 선택과목 <span style="color:var(--primary)">(수강 신청할 선택과목을 입력하세요)</span></p>
+        <div style="border-left:2px solid var(--gray-200);padding-left:16px">
+          <p style="font-size:0.78rem;font-weight:600;color:var(--gray-600);margin:0 0 2px">② 두루고 수강 과목</p>
+          <p style="font-size:0.72rem;color:var(--gray-400);margin:0 0 6px">필수과목 자동 표시 · 선택과목은 직접 추가</p>
           <table class="subj-input-table">
-            <thead>
-              <tr>
-                <th>과목명</th>
-                <th style="width:76px">학점</th>
-                <th style="width:34px"></th>
-              </tr>
-            </thead>
+            <thead><tr>
+              <th>과목명</th>
+              <th style="width:76px">학점</th>
+              <th style="width:34px"></th>
+            </tr></thead>
             <tbody id="tbody-${duruKey}"></tbody>
           </table>
-          <button class="btn-add btn-add-row" id="btn-add-${duruKey}">+ 과목 추가</button>
+          <button class="btn-add btn-add-row" id="btn-add-${duruKey}">+ 선택과목 추가</button>
         </div>` : ''}
       </div>
     `;
