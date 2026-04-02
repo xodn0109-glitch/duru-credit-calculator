@@ -894,23 +894,26 @@ function calcResults() {
   );
   const toCompleteCollapsed = collapseChoiceGroups(toComplete);
 
-  // 전학생: 이전 학기는 raw preCredits로 인정 (두루고 과목 매칭 없음)
+  // 전학생: 이전 학기 raw preCredits + 전입 학기 두루고 이수 학점 (정상 이수 간주)
   // 재학생: 두루고 편제 기준 인정 학점
+  const transferSemCredits = state.userType === 'transfer'
+    ? alreadyDone.reduce((a, s) => a + s.credits, 0)
+    : 0;
   let recognizedCredits = state.userType === 'transfer'
-    ? (state.matchResults.preCredits || 0)
+    ? (state.matchResults.preCredits || 0) + transferSemCredits
     : alreadyDone.reduce((a, s) => a + s.credits, 0);
 
   const dupIds = new Set(); // 중복이수는 이전학기 매칭 제거로 더 이상 발생 안 함
 
-  // 전학생: 남은 두루고 이수 가능 학점 = 학기당 학점 합계 (1학년 31, 2학년 29)
-  // selectionPool 과목 중복 합산을 방지하기 위해 편제 상 학기별 학점 기준으로 계산
+  // 전학생: 남은 두루고 이수 가능 학점 = 전입 학기 이후 학기만 합산
+  // (전입 학기는 정상 이수 간주하여 recognizedCredits에 포함했으므로 제외)
   const { grade: curGrade, semester: curSem } = state.studentInfo;
 
   let remainCredits;
   if (state.userType === 'transfer') {
     let durugoCapacity = 0;
     for (let g = curGrade; g <= 2; g++) {
-      const startS = (g === curGrade) ? curSem : 1;
+      const startS = (g === curGrade) ? curSem + 1 : 1;  // 전입 학기 제외
       for (let s = startS; s <= 2; s++) {
         durugoCapacity += GRADUATION_REQUIREMENTS.creditsPerSemester[g];
       }
@@ -990,7 +993,7 @@ function renderStep4() {
   document.getElementById("progress-bar-fill").style.width = pct + "%";
   document.getElementById("progress-bar-pct").textContent  = pct + "%";
   document.getElementById("progress-need").textContent     = res.remainCredits;
-  document.getElementById("label-recognized").textContent  = "인정 학점";
+  document.getElementById("label-recognized").textContent  = isCurrent ? "인정 학점" : "인정·이수 학점";
 
   const statusEl = document.getElementById("graduation-status");
   const totalGap = GRADUATION_REQUIREMENTS.totalCredits - res.totalExpected;
