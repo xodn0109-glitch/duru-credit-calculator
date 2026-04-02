@@ -1115,13 +1115,24 @@ function renderWarnings(res) {
   const isCurrent = state.userType === 'current';
   const warnings = [];
 
-  // 영역별 경고: 전학생은 이전 학교 학점이 영역별 미반영이므로 경고 생략
-  if (isCurrent) {
-    for (const [code, st] of Object.entries(res.areaStatus)) {
-      if (st.required > 0 && st.done < st.required) {
+  // 영역별 경고
+  for (const [code, st] of Object.entries(res.areaStatus)) {
+    if (st.required === 0) continue;
+    if (isCurrent) {
+      // 재학생: 현재 이수 학점 기준
+      if (st.done < st.required) {
         warnings.push({
           level: "error",
           msg: `<strong>${st.name}</strong> 영역 최소 이수 학점 미달 (필요 ${st.required}학점, 이수 ${st.done}학점 — ${st.required - st.done}학점 부족)`,
+        });
+      }
+    } else {
+      // 전학생: done(전입학기) + remain(두루고 이수 예정) 합산 기준
+      // → 두루고 편제만으로도 해당 영역을 채울 수 없을 때만 경고
+      if ((st.done + st.remain) < st.required) {
+        warnings.push({
+          level: "error",
+          msg: `<strong>${st.name}</strong> 영역 학점 부족 우려 — 두루고 편제 이수 후 예상 ${st.done + st.remain}학점 (필요 ${st.required}학점). 이전 학교 이수 학점 포함 여부를 담당 교사와 확인하세요.`,
         });
       }
     }
