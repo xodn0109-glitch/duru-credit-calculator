@@ -8,7 +8,7 @@ const state = {
   studentInfo: {},           // { name, grade, semester }
   semesterSubjects: {},      // { "y-s": [{name, credits, locked?}] }
   matchResults: null,        // 매칭 계산 결과
-  manualAreaMappings: {},    // { "과목명|학점": areaCode } — 이전학기 미매칭 과목 수동 영역 지정
+  manualAreaMappings: {},    // { "과목명|학점|학년-학기|idx": areaCode } — 이전학기 미매칭 과목 수동 영역 지정
 };
 
 const ACTIVITY_CREDITS = 18;
@@ -596,7 +596,7 @@ function computeTransferMatching() {
   // 선택과목은 학생이 실제 입력하여 매칭된 것만 포함 (미선택 과목은 제외)
   duruFixed = DURU_SUBJECTS.filter(s =>
     s.year === grade && s.semester === semester &&
-    (!s.selectionPool && !s.choiceGroup || transMatchedIds.has(s.id))
+    ((!s.selectionPool && !s.choiceGroup) || transMatchedIds.has(s.id))
   );
 
   // ⑤ 슬롯별 매칭 상태 판정
@@ -614,8 +614,6 @@ function computeTransferMatching() {
   // ⑥ 최종 allIds = 전입학기 매칭/이수 예정 두루고 과목
   // (이전 학기는 preCredits로 별도 처리하므로 allIds에 포함 안 함)
   const allIds = new Set();
-  fixedSlotStatus.forEach(({ slot, matched }) => { if (matched) allIds.add(slot.id); });
-  distSlotStatus.forEach(({ sub, matched }) => { if (matched && sub) allIds.add(sub.id); });
 
   // 두루고 배정 슬롯(비매칭 포함)도 인정 IDs에 추가
   // (비매칭 = 두루고에서 새로 이수할 과목이므로 편제상 포함)
