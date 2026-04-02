@@ -907,12 +907,13 @@ function calcResults() {
 
   // 전학생: 남은 두루고 이수 가능 학점 = 전입 학기 이후 학기만 합산
   // (전입 학기는 정상 이수 간주하여 recognizedCredits에 포함했으므로 제외)
+  // 3학년 과목 목록은 미확정이지만 학기당 27학점 용량은 졸업 계산에 포함
   const { grade: curGrade, semester: curSem } = state.studentInfo;
 
   let remainCredits;
   if (state.userType === 'transfer') {
     let durugoCapacity = 0;
-    for (let g = curGrade; g <= 2; g++) {
+    for (let g = curGrade; g <= 3; g++) {
       const startS = (g === curGrade) ? curSem + 1 : 1;  // 전입 학기 제외
       for (let s = startS; s <= 2; s++) {
         durugoCapacity += GRADUATION_REQUIREMENTS.creditsPerSemester[g];
