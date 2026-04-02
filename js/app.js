@@ -165,21 +165,19 @@ function renderStep2() {
         <span class="sem-status-badge ${statusClass}">${statusLabel}</span>
         <span id="sem-total-${key}" style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-left:8px">총 0학점</span>
       </div>
-      <div class="sem-body" ${isTransferSem ? 'style="display:grid;grid-template-columns:1fr 1fr;gap:16px"' : ''}>
-        <div>
-          ${isTransferSem ? `<p style="font-size:0.78rem;font-weight:600;color:var(--gray-600);margin:0 0 6px">① 이전 학교 수강 과목</p>` : ''}
-          <table class="subj-input-table">
-            <thead><tr>
-              <th>과목명</th>
-              <th style="width:76px">학점</th>
-              <th style="width:34px"></th>
-            </tr></thead>
-            <tbody id="tbody-${key}"></tbody>
-          </table>
-          <button class="btn-add btn-add-row" id="btn-add-${key}">+ 과목 추가</button>
-        </div>
+      <div class="sem-body">
+        ${isTransferSem ? `<p style="font-size:0.78rem;font-weight:600;color:var(--gray-600);margin:0 0 6px">① 이전 학교 수강 과목</p>` : ''}
+        <table class="subj-input-table">
+          <thead><tr>
+            <th>과목명</th>
+            <th style="width:76px">학점</th>
+            <th style="width:34px"></th>
+          </tr></thead>
+          <tbody id="tbody-${key}"></tbody>
+        </table>
+        <button class="btn-add btn-add-row" id="btn-add-${key}">+ 과목 추가</button>
         ${isTransferSem ? `
-        <div style="border-left:2px solid var(--gray-200);padding-left:16px">
+        <div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--gray-200)">
           <p style="font-size:0.78rem;font-weight:600;color:var(--gray-600);margin:0 0 2px">② 두루고 수강 과목</p>
           <p style="font-size:0.72rem;color:var(--gray-400);margin:0 0 6px">필수과목 자동 표시 · 선택과목은 직접 추가</p>
           <table class="subj-input-table">
