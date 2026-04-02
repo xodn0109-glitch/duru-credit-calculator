@@ -290,7 +290,7 @@ function updateSemTotal(tbody) {
 function appendSubjRow(tbody, name = "", credits = 3, locked = false) {
   const tr = document.createElement("tr");
   tr.innerHTML = `
-    <td class="ac-wrap"><input class="inp-subj-name" type="text" placeholder="과목명 검색 (예: 통, 공통수학)" value="${name}" autocomplete="off" ${locked ? 'disabled' : ''}></td>
+    <td class="ac-wrap"><input class="inp-subj-name" type="text" lang="ko" inputmode="text" placeholder="과목명 검색 (예: 통, 공통수학)" value="${name}" autocomplete="off" ${locked ? 'disabled' : ''}></td>
     <td><input class="inp-subj-credits" type="number" min="1" max="8" value="${credits}" ${locked ? 'disabled' : ''}></td>
     <td>${locked ? '' : '<button class="btn-remove-row" title="삭제">✕</button>'}</td>
   `;
