@@ -10,7 +10,7 @@ const GRADUATION_REQUIREMENTS = {
   minAttendance:   2 / 3,
   minAchievement:  40,
 
-  creditsPerSemester: { 1: 31, 2: 29, 3: 27 },
+  creditsPerSemester: { 1: 31, 2: 29 },
 
   // 교과 영역별 최소 이수 학점
   areaMinCredits: {

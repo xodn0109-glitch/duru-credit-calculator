@@ -902,14 +902,14 @@ function calcResults() {
 
   const dupIds = new Set(); // 중복이수는 이전학기 매칭 제거로 더 이상 발생 안 함
 
-  // 전학생: 남은 두루고 이수 가능 학점 = 학기당 학점 합계 (1학년 31, 2학년 29, 3학년 27)
+  // 전학생: 남은 두루고 이수 가능 학점 = 학기당 학점 합계 (1학년 31, 2학년 29)
   // selectionPool 과목 중복 합산을 방지하기 위해 편제 상 학기별 학점 기준으로 계산
   const { grade: curGrade, semester: curSem } = state.studentInfo;
 
   let remainCredits;
   if (state.userType === 'transfer') {
     let durugoCapacity = 0;
-    for (let g = curGrade; g <= 3; g++) {
+    for (let g = curGrade; g <= 2; g++) {
       const startS = (g === curGrade) ? curSem : 1;
       for (let s = startS; s <= 2; s++) {
         durugoCapacity += GRADUATION_REQUIREMENTS.creditsPerSemester[g];
@@ -1112,7 +1112,7 @@ function renderAutoSatisfiedGuidance(res) {
         아래 3개 영역은 두루고 편제 과목을 빠짐없이 이수하면 최소 이수 학점이 <strong>자동으로 충족</strong>됩니다.
       </p>
       ${statusRow("체육", 10, pe.done, peMissing, "체육1·2 + 스포츠생활1·2 + 스포츠문화 + 스포츠과학 = 10학점")}
-      ${statusRow("예술(음악·미술)", 10, arts.done, artsMissingFull, "음악·미술(1학년) + 3학년 택1 두 그룹(각 2학점) = 10학점")}
+      ${statusRow("예술(음악·미술)", 10, arts.done, artsMissingFull, "음악·미술(1학년 6학점) + 3학년 편제 확정 후 추가 예정")}
       ${statusRow("기가/정보/제2외국어/교양", 16, oth.done, othMissing, "1학년 기가·정보·진로·생태(10학점) + 2학년 제2외국어 택1 두 그룹(6학점) = 16학점")}
     </div>
   `;
