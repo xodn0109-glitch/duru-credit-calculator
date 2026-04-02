@@ -151,16 +151,19 @@ function renderStep2() {
     const block = document.createElement("div");
     block.className = `sem-block ${statusClass}`;
 
+    const duruKey = `duru-${key}`;
+    if (isTransferSem && !state.semesterSubjects[duruKey]) {
+      state.semesterSubjects[duruKey] = [];
+    }
+
     block.innerHTML = `
       <div class="sem-block-header">
         <span class="sem-title">${year}학년 ${s}학기</span>
         <span class="sem-status-badge ${statusClass}">${statusLabel}</span>
         <span id="sem-total-${key}" style="font-size:0.78rem;font-weight:600;color:var(--gray-400);margin-left:8px">총 0학점</span>
-        ${isTransferSem
-          ? `<span style="font-size:0.75rem;color:var(--primary);margin-left:auto;white-space:nowrap">이전 학교에서 이수한 과목 입력 (두루고 편제와 매칭됩니다)</span>`
-          : ''}
       </div>
       <div class="sem-body">
+        ${isTransferSem ? `<p style="font-size:0.78rem;color:var(--gray-500);margin:0 0 6px">① 이전 학교 수강 과목 <span style="color:var(--primary)">(두루고 편제와 매칭됩니다)</span></p>` : ''}
         <table class="subj-input-table">
           <thead>
             <tr>
@@ -172,6 +175,21 @@ function renderStep2() {
           <tbody id="tbody-${key}"></tbody>
         </table>
         <button class="btn-add btn-add-row" id="btn-add-${key}">+ 과목 추가</button>
+        ${isTransferSem ? `
+        <div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--gray-200)">
+          <p style="font-size:0.78rem;color:var(--gray-500);margin:0 0 6px">② 두루고 이수 희망 선택과목 <span style="color:var(--primary)">(수강 신청할 선택과목을 입력하세요)</span></p>
+          <table class="subj-input-table">
+            <thead>
+              <tr>
+                <th>과목명</th>
+                <th style="width:76px">학점</th>
+                <th style="width:34px"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-${duruKey}"></tbody>
+          </table>
+          <button class="btn-add btn-add-row" id="btn-add-${duruKey}">+ 과목 추가</button>
+        </div>` : ''}
       </div>
     `;
     container.appendChild(block);
@@ -184,6 +202,16 @@ function renderStep2() {
     document.getElementById(`btn-add-${key}`).addEventListener("click", () => {
       appendSubjRow(document.getElementById(`tbody-${key}`));
     });
+
+    if (isTransferSem) {
+      const duruTbody = document.getElementById(`tbody-${duruKey}`);
+      for (const sub of (state.semesterSubjects[duruKey] || [])) {
+        appendSubjRow(duruTbody, sub.name, sub.credits, sub.locked);
+      }
+      document.getElementById(`btn-add-${duruKey}`).addEventListener("click", () => {
+        appendSubjRow(document.getElementById(`tbody-${duruKey}`));
+      });
+    }
 
     // 재학생 & 2학년 이상: 1-2 블록 직후에 교차이수 블록 삽입
     if (!isTrans && grade >= 2 && year === 1 && s === 2) {
@@ -472,6 +500,8 @@ function collectSemesterSubjects() {
   const allKeys = getSemesters(grade, semester).map(({year, semester: s}) => `${year}-${s}`);
   // 재학생 2학년 이상이면 교차이수 블록도 수집
   if (state.userType !== 'transfer' && grade >= 2) allKeys.push('cross-y1');
+  // 전학생은 전입학기 두루고 이수 희망 선택과목 블록도 수집
+  if (state.userType === 'transfer') allKeys.push(`duru-${grade}-${semester}`);
 
   for (const key of allKeys) {
     const tbody = document.getElementById(`tbody-${key}`);
@@ -594,8 +624,16 @@ function computeTransferMatching() {
   const transMatchedIds = new Set();
   const transResults = (state.semesterSubjects[transKey] || []).map(sub => {
     const r = autoMatch(sub.name);
-    if (r.matched) r.targets.forEach(t => transMatchedIds.add(t.id));
+    if (r.matched) r.targets.forEach(t => { if (t.id) transMatchedIds.add(t.id); });
     return { ...sub, ...r, isDuplicate: false };
+  });
+
+  // ④-a 두루고 이수 희망 선택과목도 transMatchedIds에 추가
+  // (이전 학교 매칭과 무관하게 학생이 직접 선택한 두루고 과목)
+  const duruElectKey = `duru-${grade}-${semester}`;
+  (state.semesterSubjects[duruElectKey] || []).forEach(sub => {
+    const r = autoMatch(sub.name);
+    if (r.matched) r.targets.forEach(t => { if (t.id) transMatchedIds.add(t.id); });
   });
 
   // 교양 보완쌍 상호 인정: 진로와직업(CA_1) ↔ 생태와환경(EC_1)
