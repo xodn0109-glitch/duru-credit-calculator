@@ -38,16 +38,6 @@ const SELECTION_POOLS = {
   lang_y2s2:  { pick: 1, credits: 3, year: 2, semester: 2, label: '제2외국어·한문②(택1)' },
   // 2학년 2학기: 13개 중 택4 (3학점)
   elect_y2s2: { pick: 4, credits: 3, year: 2, semester: 2, label: '2-2 선택(택4)' },
-  // 3학년 1학기: 22개 중 택4 (3학점)
-  elect_y3s1: { pick: 4, credits: 3, year: 3, semester: 1, label: '3-1 선택(택4)' },
-  // 3학년 1학기: 예술 2개 중 택1 (2학점)
-  arts_y3s1:  { pick: 1, credits: 2, year: 3, semester: 1, label: '예술③(택1)' },
-  // 3학년 2학기: 예술 2개 중 택1 (2학점)
-  arts_y3s2:  { pick: 1, credits: 2, year: 3, semester: 2, label: '예술④(택1)' },
-  // 3학년 2학기: 11개 중 택3 (3학점)
-  elect_y3s2a: { pick: 3, credits: 3, year: 3, semester: 2, label: '3-2 선택A(택3)' },
-  // 3학년 2학기: 6개 중 택3 (3학점)
-  elect_y3s2b: { pick: 3, credits: 3, year: 3, semester: 2, label: '3-2 선택B(택3)' },
 };
 
 // ============================================================
@@ -162,84 +152,6 @@ const DURU_SUBJECTS = [
   { id:"L2_JP2", name:"일본어 회화",       area:"others",  credits:3, type:"career",      year:2, semester:2, choiceGroup:"lang_y2s2", choiceLabel:"제2외국어·한문②(택1)", selectionPool:"lang_y2s2" },
   { id:"L2_HN2", name:"언어생활과 한자",   area:"others",  credits:3, type:"convergence", year:2, semester:2, choiceGroup:"lang_y2s2", choiceLabel:"제2외국어·한문②(택1)", selectionPool:"lang_y2s2" },
 
-  // ════════════════════════════════════════════════════════
-  // 3학년 과목
-  // ════════════════════════════════════════════════════════
-
-  // 국어 (3학년)
-  { id:"KO_G3",  name:"독서와 작문",       area:"korean",  credits:4, type:"general",     year:3, semester:1 },
-  { id:"KO_CA1", name:"문학과 영상",       area:"korean",  credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"KO_CV1", name:"언어생활 탐구",     area:"korean",  credits:3, type:"convergence", year:3, semester:2 },
-  { id:"KO_CV2", name:"독서 토론과 글쓰기",area:"korean",  credits:3, type:"convergence", year:3, semester:2, selectionPool:"elect_y3s2a" },
-
-  // 수학 (3학년)
-  { id:"MA_G3",  name:"확률과 통계",       area:"math",    credits:4, type:"general",     year:3, semester:1 },
-  { id:"MA_CA4", name:"미적분Ⅱ",          area:"math",    credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"MA_CA5", name:"고급 대수",         area:"math",    credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"MA_CA6", name:"고급 미적분",       area:"math",    credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2a" },
-  { id:"MA_CV1", name:"수학과제 탐구",     area:"math",    credits:3, type:"convergence", year:3, semester:2, selectionPool:"elect_y3s2a" },
-
-  // 영어 (3학년)
-  { id:"EN_G3",  name:"영어 독해와 작문",  area:"english", credits:4, type:"general",     year:3, semester:1 },
-  { id:"EN_CA1", name:"영미 문학 읽기",    area:"english", credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"EN_CA2", name:"심화 영어",         area:"english", credits:3, type:"career",      year:3, semester:2 },
-  { id:"EN_CV2", name:"실생활 영어 회화",  area:"english", credits:3, type:"convergence", year:3, semester:2, selectionPool:"elect_y3s2a" },
-
-  // 사회 (3학년 1학기)
-  { id:"SO_CV1", name:"역사로 탐구하는 현대 세계(3-1)", area:"social", credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SO_CV2", name:"여행지리",          area:"social",  credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SO_CV3", name:"사회문제 탐구",     area:"social",  credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SO_CV4", name:"윤리문제 탐구",     area:"social",  credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-
-  // 사회 (3학년 2학기)
-  { id:"SO_CA1", name:"인문학과 윤리",     area:"social",  credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2b" },
-  { id:"SO_CV5", name:"역사로 탐구하는 현대 세계(3-2)", area:"social", credits:3, type:"convergence", year:3, semester:2, selectionPool:"elect_y3s2b" },
-  { id:"SO_CV6", name:"기후변화와 지속가능한 세계",     area:"social", credits:3, type:"convergence", year:3, semester:2, selectionPool:"elect_y3s2b" },
-  { id:"SO_CV7", name:"금융과 경제생활",   area:"social",  credits:3, type:"convergence", year:3, semester:2, selectionPool:"elect_y3s2b" },
-
-  // 과학 (3학년 1학기)
-  { id:"SC_CA5", name:"전자기와 양자",     area:"science", credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SC_CA6", name:"화학 반응의 세계",  area:"science", credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SC_CA7", name:"생물의 유전",       area:"science", credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SC_CA8", name:"행성우주과학",      area:"science", credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SC_CV1", name:"융합과학 탐구",     area:"science", credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SC_CA9", name:"고급 물리학",       area:"science", credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"SC_CA10",name:"고급 화학",         area:"science", credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-
-  // 과학 (3학년 2학기)
-  { id:"SC_CV2", name:"과학의 역사와 문화",area:"science", credits:3, type:"convergence", year:3, semester:2, selectionPool:"elect_y3s2b" },
-  { id:"SC_CV3", name:"기후변화와 환경생태",area:"science",credits:3, type:"convergence", year:3, semester:2, selectionPool:"elect_y3s2b" },
-
-  // 체육 (3학년: 1+1=2학점)
-  { id:"PE_3_1", name:"스포츠 문화",       area:"pe",      credits:1, type:"career",      year:3, semester:1 },
-  { id:"PE_3_2", name:"스포츠 과학",       area:"pe",      credits:1, type:"career",      year:3, semester:2 },
-  { id:"PE_3_3", name:"운동과 건강",       area:"pe",      credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"PE_3_4", name:"기초 체육 전공 실기",area:"pe",     credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2a" },
-
-  // 예술 (3학년: 택1×2 = 4학점)
-  { id:"MU_3_1", name:"음악 연주와 창작",  area:"arts",    credits:2, type:"career",      year:3, semester:1, choiceGroup:"arts_y3s1", choiceLabel:"예술③(택1)", selectionPool:"arts_y3s1" },
-  { id:"AR_3_1", name:"미술 창작",         area:"arts",    credits:2, type:"career",      year:3, semester:1, choiceGroup:"arts_y3s1", choiceLabel:"예술③(택1)", selectionPool:"arts_y3s1" },
-  { id:"MU_3_2", name:"음악 감상과 비평",  area:"arts",    credits:2, type:"career",      year:3, semester:2, choiceGroup:"arts_y3s2", choiceLabel:"예술④(택1)", selectionPool:"arts_y3s2" },
-  { id:"AR_3_2", name:"미술 감상과 비평",  area:"arts",    credits:2, type:"career",      year:3, semester:2, choiceGroup:"arts_y3s2", choiceLabel:"예술④(택1)", selectionPool:"arts_y3s2" },
-  // 예술 추가 선택
-  { id:"MU_CV1", name:"음악과 미디어",     area:"arts",    credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"AR_CV1", name:"미술과 매체",       area:"arts",    credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"MU_CA1", name:"음악 이론",         area:"arts",    credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2a" },
-  { id:"AR_CA1", name:"미술 전공 실기",    area:"arts",    credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2a" },
-
-  // 정보 (3학년)
-  { id:"IT_CA1", name:"인공지능 기초",     area:"others",  credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"IT_CA2", name:"소프트웨어와 생활", area:"others",  credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2a" },
-
-  // 제2외국어/한문 (3학년 1학기: elect_y3s1 풀 소속)
-  { id:"L2_CN3", name:"중국 문화",         area:"others",  credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"L2_JP3", name:"일본 문화",         area:"others",  credits:3, type:"convergence", year:3, semester:1, selectionPool:"elect_y3s1" },
-  { id:"L2_HN3", name:"한문 고전 읽기(3-1)",area:"others", credits:3, type:"career",      year:3, semester:1, selectionPool:"elect_y3s1" },
-
-  // 제2외국어/한문 (3학년 2학기: elect_y3s2a 풀 소속)
-  { id:"L2_CN4", name:"심화 중국어",       area:"others",  credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2a" },
-  { id:"L2_JP4", name:"심화 일본어",       area:"others",  credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2a" },
-  { id:"L2_HN4", name:"한문 고전 읽기(3-2)",area:"others", credits:3, type:"career",      year:3, semester:2, selectionPool:"elect_y3s2a" },
 ];
 
 // ============================================================
