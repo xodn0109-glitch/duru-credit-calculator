@@ -584,7 +584,7 @@ const AREA_NAMES = {
   korean:  "국어",
   math:    "수학",
   english: "영어",
-  social:  "사회(한국사 포함)",
+  social:  "사회",
   science: "과학",
   pe:      "체육",
   arts:    "예술(음악·미술)",
