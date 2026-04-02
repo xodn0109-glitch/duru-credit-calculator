@@ -85,7 +85,7 @@ const DURU_SUBJECTS = [
   { id:"MU_1",   name:"음악",              area:"arts",    credits:3, type:"general", year:1, semester:null },
   { id:"AR_1",   name:"미술",              area:"arts",    credits:3, type:"general", year:1, semester:null },
 
-  // 기타 1학년 (기가 + 정보 + 진로 + 생태 = 10학점, 학기별 교차)
+  // 기가/정보/교양 1학년 (기가 + 정보 + 진로 + 생태 = 10학점, 학기별 교차)
   { id:"TH_1",   name:"기술·가정",         area:"others",  credits:3, type:"general", year:1, semester:null },
   { id:"IN_1",   name:"정보",              area:"others",  credits:3, type:"general", year:1, semester:null },
   { id:"CA_1",   name:"진로와 직업",       area:"others",  credits:2, type:"general", year:1, semester:null },
@@ -301,7 +301,7 @@ const SUBJECT_ALIASES = [
   { aliases:["음악이론"],                                            targetIds:["MU_1"] },
   { aliases:["미술전공실기","미술 전공 실기"],                       targetIds:["AR_1"] },
 
-  // 기타 1학년
+  // 기가/정보/교양 1학년
   { aliases:["기술가정","기술·가정","기술·가정"],                    targetIds:["TH_1"] },
   { aliases:["정보"],                                                 targetIds:["IN_1"] },
   { aliases:["진로와직업","진로와 직업","진로"],                     targetIds:["CA_1"] },

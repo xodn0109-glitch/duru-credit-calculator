@@ -313,7 +313,7 @@ function buildAcCandidates() {
   const seen = new Set();
   const items = [];
   const AREA_LABEL = { korean:'국어', math:'수학', english:'영어', social:'사회',
-    science:'과학', pe:'체육', arts:'예술', others:'기타' };
+    science:'과학', pe:'체육', arts:'예술', others:'기가/정보/제2외국어/한문/교양' };
 
   // ① 두루고 편제 과목명 (정규 이름) — 공백 제거 소문자로 빠른 조회용 Set 구축
   const duruNames = new Set(); // 정규 과목명 (공백 제거 소문자)
