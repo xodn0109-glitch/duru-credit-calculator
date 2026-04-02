@@ -182,6 +182,7 @@ const ALTERNATIVE_SUBJECTS = {
 
 // ============================================================
 // 이전 학교 과목명 → 두루고 과목 ID 매핑 (별칭 테이블)
+// ※ 모든 targetIds는 현재 DURU_SUBJECTS에 존재하는 ID만 사용
 // ============================================================
 const SUBJECT_ALIASES = [
   // 국어
@@ -190,11 +191,11 @@ const SUBJECT_ALIASES = [
   { aliases:["공통국어2"],                                           targetIds:["KO_C2"] },
   { aliases:["문학"],                                                targetIds:["KO_G1"] },
   { aliases:["화법과작문","화법과 언어","화법과언어"],               targetIds:["KO_G2"] },
-  { aliases:["독서","독서와작문","독서와 작문"],                     targetIds:["KO_G3"] },
-  { aliases:["언어와매체","언어생활탐구","언어생활 탐구"],           targetIds:["KO_CV1"] },
+  { aliases:["독서","독서와작문","독서와 작문"],                     targetIds:["KO_G2"] },
+  { aliases:["언어와매체","언어생활탐구","언어생활 탐구"],           targetIds:["KO_G2"] },
   { aliases:["주제탐구독서","주제 탐구 독서"],                       targetIds:["KO_CA2"] },
-  { aliases:["문학과영상","문학과 영상"],                            targetIds:["KO_CA1"] },
-  { aliases:["독서토론과글쓰기","독서 토론과 글쓰기"],               targetIds:["KO_CV2"] },
+  { aliases:["문학과영상","문학과 영상"],                            targetIds:["KO_G1"] },
+  { aliases:["독서토론과글쓰기","독서 토론과 글쓰기"],               targetIds:["KO_G2"] },
 
   // 수학
   { aliases:["수학","수학(상)","수학(하)"],                          targetIds:["MA_C1","MA_C2"] },
@@ -210,11 +211,11 @@ const SUBJECT_ALIASES = [
   { aliases:["미적분I","미적분Ⅰ","미적분","미적분학"],              targetIds:["MA_G2"] },
   { aliases:["인공지능수학","인공지능 수학"],                        targetIds:["MA_CA2"] },
   { aliases:["경제수학","경제 수학"],                                targetIds:["MA_CA3"] },
-  { aliases:["확률과통계","확률과 통계"],                            targetIds:["MA_G3"] },
-  { aliases:["미적분II","미적분Ⅱ","미적분2"],                       targetIds:["MA_CA4"] },
-  { aliases:["고급대수","고급 대수"],                                targetIds:["MA_CA5"] },
-  { aliases:["고급미적분","고급 미적분"],                            targetIds:["MA_CA6"] },
-  { aliases:["수학과제탐구","수학과제 탐구"],                        targetIds:["MA_CV1"] },
+  { aliases:["확률과통계","확률과 통계"],                            targetIds:["MA_G2"] },
+  { aliases:["미적분II","미적분Ⅱ","미적분2"],                       targetIds:["MA_G2"] },
+  { aliases:["고급대수","고급 대수"],                                targetIds:["MA_G1"] },
+  { aliases:["고급미적분","고급 미적분"],                            targetIds:["MA_G2"] },
+  { aliases:["수학과제탐구","수학과제 탐구"],                        targetIds:["MA_G1"] },
 
   // 영어
   { aliases:["영어","영어(상)","영어(하)"],                          targetIds:["EN_C1","EN_C2"] },
@@ -225,11 +226,11 @@ const SUBJECT_ALIASES = [
   { aliases:["기본영어2"],                                           targetIds:["EN_C2"] },
   { aliases:["영어I","영어Ⅰ","영어1"],                             targetIds:["EN_G1"] },
   { aliases:["영어II","영어Ⅱ","영어2"],                            targetIds:["EN_G2"] },
-  { aliases:["영어독해와작문","영어 독해와 작문"],                   targetIds:["EN_G3"] },
+  { aliases:["영어독해와작문","영어 독해와 작문"],                   targetIds:["EN_G2"] },
   { aliases:["세계문화와영어","세계 문화와 영어"],                   targetIds:["EN_CV1"] },
-  { aliases:["영미문학읽기","영미 문학 읽기"],                       targetIds:["EN_CA1"] },
-  { aliases:["심화영어","심화 영어","심화영어독해와작문","심화 영어 독해와 작문"], targetIds:["EN_CA2"] },
-  { aliases:["실생활영어회화","실생활 영어 회화"],                   targetIds:["EN_CV2"] },
+  { aliases:["영미문학읽기","영미 문학 읽기"],                       targetIds:["EN_G1"] },
+  { aliases:["심화영어","심화 영어","심화영어독해와작문","심화 영어 독해와 작문"], targetIds:["EN_G2"] },
+  { aliases:["실생활영어회화","실생활 영어 회화"],                   targetIds:["EN_G1"] },
 
   // 한국사 & 사회 (area: social)
   { aliases:["한국사","한국사1"],                                             targetIds:["HI_C1"] },
@@ -246,13 +247,13 @@ const SUBJECT_ALIASES = [
   { aliases:["세계지리","세계시민과지리","세계시민과 지리"],                  targetIds:["SO_G8"] },
   { aliases:["경제"],                                                         targetIds:["SO_G9"] },
   { aliases:["정치"],                                                         targetIds:["SO_G10"] },
-  { aliases:["여행지리"],                                                     targetIds:["SO_CV2"] },
-  { aliases:["역사로탐구하는현대세계","역사로 탐구하는 현대 세계"],          targetIds:["SO_CV1","SO_CV5"] },
-  { aliases:["사회문제탐구","사회문제 탐구"],                                 targetIds:["SO_CV3"] },
-  { aliases:["윤리문제탐구","윤리문제 탐구"],                                 targetIds:["SO_CV4"] },
-  { aliases:["인문학과윤리","인문학과 윤리"],                                 targetIds:["SO_CA1"] },
-  { aliases:["기후변화와지속가능한세계","기후변화와 지속가능한 세계"],        targetIds:["SO_CV6"] },
-  { aliases:["금융과경제생활","금융과 경제생활"],                             targetIds:["SO_CV7"] },
+  { aliases:["여행지리"],                                                     targetIds:["SO_G8"] },
+  { aliases:["역사로탐구하는현대세계","역사로 탐구하는 현대 세계"],          targetIds:["SO_G6"] },
+  { aliases:["사회문제탐구","사회문제 탐구"],                                 targetIds:["SO_G7"] },
+  { aliases:["윤리문제탐구","윤리문제 탐구"],                                 targetIds:["SO_G4"] },
+  { aliases:["인문학과윤리","인문학과 윤리"],                                 targetIds:["SO_G4"] },
+  { aliases:["기후변화와지속가능한세계","기후변화와 지속가능한 세계"],        targetIds:["SO_G8"] },
+  { aliases:["금융과경제생활","금융과 경제생활"],                             targetIds:["SO_G9"] },
 
   // 과학
   { aliases:["통합과학","통합과학1"],                                targetIds:["SC_C1"] },
@@ -267,40 +268,38 @@ const SUBJECT_ALIASES = [
   { aliases:["물질과에너지","물질과 에너지"],                        targetIds:["SC_CA2"] },
   { aliases:["세포와물질대사","세포와 물질대사"],                    targetIds:["SC_CA3"] },
   { aliases:["지구시스템과학"],                                      targetIds:["SC_CA4"] },
-  { aliases:["전자기와양자","전자기와 양자"],                        targetIds:["SC_CA5"] },
-  { aliases:["화학반응의세계","화학 반응의 세계"],                   targetIds:["SC_CA6"] },
-  { aliases:["생물의유전","생물의 유전"],                            targetIds:["SC_CA7"] },
-  { aliases:["행성우주과학"],                                        targetIds:["SC_CA8"] },
-  { aliases:["융합과학탐구","융합과학 탐구"],                        targetIds:["SC_CV1"] },
-  { aliases:["고급물리학","고급 물리학"],                            targetIds:["SC_CA9"] },
-  { aliases:["고급화학","고급 화학"],                                targetIds:["SC_CA10"] },
-  { aliases:["과학의역사와문화","과학의 역사와 문화"],               targetIds:["SC_CV2"] },
-  { aliases:["기후변화와환경생태","기후변화와 환경생태"],            targetIds:["SC_CV3"] },
+  { aliases:["전자기와양자","전자기와 양자"],                        targetIds:["SC_G1","SC_CA1"] },
+  { aliases:["화학반응의세계","화학 반응의 세계"],                   targetIds:["SC_G2","SC_CA2"] },
+  { aliases:["생물의유전","생물의 유전"],                            targetIds:["SC_G3","SC_CA3"] },
+  { aliases:["행성우주과학"],                                        targetIds:["SC_G4","SC_CA4"] },
+  { aliases:["융합과학탐구","융합과학 탐구"],                        targetIds:["SC_C1","SC_C2"] },
+  { aliases:["고급물리학","고급 물리학"],                            targetIds:["SC_G1"] },
+  { aliases:["고급화학","고급 화학"],                                targetIds:["SC_G2"] },
+  { aliases:["과학의역사와문화","과학의 역사와 문화"],               targetIds:["SC_C1"] },
+  { aliases:["기후변화와환경생태","기후변화와 환경생태"],            targetIds:["EC_1"] },
 
   // 체육
   { aliases:["체육","체육1"],                                        targetIds:["PE_1_1"] },
   { aliases:["체육2"],                                               targetIds:["PE_1_2"] },
   { aliases:["스포츠생활","스포츠생활1","스포츠 생활1"],             targetIds:["PE_2_1"] },
   { aliases:["스포츠생활2","스포츠 생활2"],                          targetIds:["PE_2_2"] },
-  { aliases:["스포츠문화","스포츠 문화"],                            targetIds:["PE_3_1","PE_1_1"] },
-  { aliases:["스포츠과학","스포츠 과학"],                            targetIds:["PE_3_2","PE_1_2"] },
-  { aliases:["운동과건강","운동과 건강"],                            targetIds:["PE_3_3"] },
-  { aliases:["기초체육전공실기","기초 체육 전공 실기"],              targetIds:["PE_3_4"] },
+  { aliases:["스포츠문화","스포츠 문화"],                            targetIds:["PE_1_1"] },
+  { aliases:["스포츠과학","스포츠 과학"],                            targetIds:["PE_1_2"] },
+  { aliases:["운동과건강","운동과 건강"],                            targetIds:["PE_2_1"] },
+  { aliases:["기초체육전공실기","기초 체육 전공 실기"],              targetIds:["PE_1_1"] },
 
   // 예술
   { aliases:["음악","음악1"],                                        targetIds:["MU_1"] },
   { aliases:["미술","미술1"],                                        targetIds:["AR_1"] },
-  // 타교 예술 과목 매핑
-  // · 같은 교과명 과목(음악 감상과 비평, 미술 감상과 비평 등)은 1학년 슬롯(MU_1/AR_1)으로 인정
-  // · 두루고 3학년 과목명과 동일한 것은 해당 3학년 슬롯으로 정확히 매핑 (중복이수 방지)
-  { aliases:["음악연주와창작","음악 연주와 창작"],                   targetIds:["MU_1","MU_3_1"] },
-  { aliases:["미술창작","미술 창작"],                                targetIds:["AR_1","AR_3_1"] },
-  { aliases:["음악감상과비평","음악 감상과 비평"],                   targetIds:["MU_1","MU_3_2"] },
-  { aliases:["미술감상과비평","미술 감상과 비평"],                   targetIds:["AR_1","AR_3_2"] },
-  { aliases:["음악과미디어","음악과 미디어"],                        targetIds:["MU_CV1"] },
-  { aliases:["미술과매체","미술과 매체"],                            targetIds:["AR_CV1"] },
-  { aliases:["음악이론"],                                            targetIds:["MU_CA1"] },
-  { aliases:["미술전공실기","미술 전공 실기"],                       targetIds:["AR_CA1"] },
+  // 타교 예술 과목 → 1학년 슬롯(MU_1/AR_1)으로 인정
+  { aliases:["음악연주와창작","음악 연주와 창작"],                   targetIds:["MU_1"] },
+  { aliases:["미술창작","미술 창작"],                                targetIds:["AR_1"] },
+  { aliases:["음악감상과비평","음악 감상과 비평"],                   targetIds:["MU_1"] },
+  { aliases:["미술감상과비평","미술 감상과 비평"],                   targetIds:["AR_1"] },
+  { aliases:["음악과미디어","음악과 미디어"],                        targetIds:["MU_1"] },
+  { aliases:["미술과매체","미술과 매체"],                            targetIds:["AR_1"] },
+  { aliases:["음악이론"],                                            targetIds:["MU_1"] },
+  { aliases:["미술전공실기","미술 전공 실기"],                       targetIds:["AR_1"] },
 
   // 기타 1학년
   { aliases:["기술가정","기술·가정","기술·가정"],                    targetIds:["TH_1"] },
@@ -315,14 +314,15 @@ const SUBJECT_ALIASES = [
   { aliases:["중국어회화","중국어 회화"],                            targetIds:["L2_CN2"] },
   { aliases:["일본어회화","일본어 회화"],                            targetIds:["L2_JP2"] },
   { aliases:["언어생활과한자","언어생활과 한자"],                    targetIds:["L2_HN2"] },
-  { aliases:["중국문화","중국 문화"],                                targetIds:["L2_CN3"] },
-  { aliases:["일본문화","일본 문화"],                                targetIds:["L2_JP3"] },
-  { aliases:["한문고전읽기","한문 고전 읽기"],                       targetIds:["L2_HN3","L2_HN4"] },
-  { aliases:["심화중국어","심화 중국어"],                            targetIds:["L2_CN4"] },
-  { aliases:["심화일본어","심화 일본어"],                            targetIds:["L2_JP4"] },
+  { aliases:["중국문화","중국 문화"],                                targetIds:["L2_CN2"] },
+  { aliases:["일본문화","일본 문화"],                                targetIds:["L2_JP2"] },
+  { aliases:["한문고전읽기","한문 고전 읽기"],                       targetIds:["L2_HN2"] },
+  { aliases:["심화중국어","심화 중국어"],                            targetIds:["L2_CN2"] },
+  { aliases:["심화일본어","심화 일본어"],                            targetIds:["L2_JP2"] },
 
-  // 정보 (3학년) — 인공지능 기초는 아래 IT 계열 항목에서 IN_1 포함하여 처리
-  { aliases:["소프트웨어와생활","소프트웨어와 생활"],                targetIds:["IT_CA2"] },
+  // 정보 심화·응용
+  { aliases:["소프트웨어와생활","소프트웨어와 생활"],                targetIds:["IN_1"] },
+  { aliases:["인공지능기초","인공지능 기초"],                        targetIds:["IN_1"] },
 
   // ── 전문 교과 (특성화고·직업계고 전학생 대응) ──────────────────
   // 전문 공통 과목
@@ -340,33 +340,30 @@ const SUBJECT_ALIASES = [
              "컴퓨터그래픽","컴퓨터 그래픽",
              "웹디자인","웹 디자인"],                                targetIds:["IN_1"] },
 
-  // 정보·통신 계열 심화 → 인공지능 기초 (IT_CA1) + 정보 (IN_1) 인정
-  { aliases:["인공지능기초","인공지능 기초"],                        targetIds:["IT_CA1","IN_1"] },
+  // 정보·통신 계열 심화·실무 → 정보 (IN_1)
   { aliases:["인공지능일반","인공지능 일반",
              "빅데이터분석","빅 데이터 분석",
              "인공지능모델링","인공지능 모델링",
-             "사물인터넷과센서제어","사물 인터넷과 센서 제어"],       targetIds:["IT_CA1","IN_1"] },
-
-  // 정보·통신 계열 실무 → 소프트웨어와 생활 (IT_CA2)
+             "사물인터넷과센서제어","사물 인터넷과 센서 제어"],       targetIds:["IN_1"] },
   { aliases:["응용프로그래밍개발","응용 프로그래밍 개발",
              "네트워크구축","네트워크 구축",
-             "시스템프로그래밍","시스템 프로그래밍"],                 targetIds:["IT_CA2"] },
+             "시스템프로그래밍","시스템 프로그래밍"],                 targetIds:["IN_1"] },
 
   // 경영·금융 계열 → 사회 영역
   { aliases:["상업경제","상업 경제",
              "기업과경영","기업과 경영"],                             targetIds:["SO_G9"] },
   { aliases:["금융일반","금융 일반",
-             "보험일반","보험 일반"],                                 targetIds:["SO_CV7"] },
+             "보험일반","보험 일반"],                                 targetIds:["SO_G9"] },
 
   // ── 외국어·국제계열 영어 (외고·국제고 전학생 대응) ────────────
-  { aliases:["심화 영어Ⅰ","심화 영어I","심화영어Ⅰ","심화영어1"],            targetIds:["EN_G1","EN_CA2"] },
-  { aliases:["심화 영어Ⅱ","심화 영어II","심화영어Ⅱ","심화영어2"],           targetIds:["EN_G2","EN_CA2"] },
-  { aliases:["심화 영어 회화Ⅰ","심화영어회화Ⅰ","심화영어회화1"],            targetIds:["EN_CA1","EN_G1"] },
-  { aliases:["심화 영어 회화Ⅱ","심화영어회화Ⅱ","심화영어회화2"],            targetIds:["EN_CA2","EN_G2"] },
-  { aliases:["심화 영어 독해Ⅰ","심화영어독해Ⅰ","심화영어독해1"],            targetIds:["EN_G3","EN_CA2"] },
-  { aliases:["심화 영어 독해Ⅱ","심화영어독해Ⅱ","심화영어독해2"],            targetIds:["EN_CA2"] },
-  { aliases:["심화 영어 작문Ⅰ","심화영어작문Ⅰ","심화영어작문1"],            targetIds:["EN_G3","EN_CA2"] },
-  { aliases:["심화 영어 작문Ⅱ","심화영어작문Ⅱ","심화영어작문2"],            targetIds:["EN_CA2"] },
+  { aliases:["심화 영어Ⅰ","심화 영어I","심화영어Ⅰ","심화영어1"],            targetIds:["EN_G1"] },
+  { aliases:["심화 영어Ⅱ","심화 영어II","심화영어Ⅱ","심화영어2"],           targetIds:["EN_G2"] },
+  { aliases:["심화 영어 회화Ⅰ","심화영어회화Ⅰ","심화영어회화1"],            targetIds:["EN_G1"] },
+  { aliases:["심화 영어 회화Ⅱ","심화영어회화Ⅱ","심화영어회화2"],            targetIds:["EN_G2"] },
+  { aliases:["심화 영어 독해Ⅰ","심화영어독해Ⅰ","심화영어독해1"],            targetIds:["EN_G2"] },
+  { aliases:["심화 영어 독해Ⅱ","심화영어독해Ⅱ","심화영어독해2"],            targetIds:["EN_G2"] },
+  { aliases:["심화 영어 작문Ⅰ","심화영어작문Ⅰ","심화영어작문1"],            targetIds:["EN_G2"] },
+  { aliases:["심화 영어 작문Ⅱ","심화영어작문Ⅱ","심화영어작문2"],            targetIds:["EN_G2"] },
 
   // ── 외국어·국제계열 사회 (area: social) ────────────────────────
   { aliases:["국제 정치","국제정치"],                                         targetIds:["SO_G10"] },
@@ -375,15 +372,15 @@ const SUBJECT_ALIASES = [
   { aliases:["지역 이해","지역이해"],                                         targetIds:["SO_G8"] },
   { aliases:["한국 사회의 이해","한국사회의이해"],                            targetIds:["SO_G2"] },
   { aliases:["비교 문화","비교문화"],                                         targetIds:["SO_G2"] },
-  { aliases:["세계 문제와 미래 사회","세계문제와미래사회"],                  targetIds:["SO_CV6"] },
+  { aliases:["세계 문제와 미래 사회","세계문제와미래사회"],                  targetIds:["SO_G8"] },
   { aliases:["국제 관계와 국제기구","국제관계와국제기구"],                   targetIds:["SO_G10"] },
-  { aliases:["현대 세계의 변화","현대세계의변화"],                           targetIds:["SO_CV1"] },
-  { aliases:["사회 탐구 방법","사회탐구방법"],                               targetIds:["SO_CV3"] },
-  { aliases:["사회과제 연구","사회과제연구"],                                 targetIds:["SO_CV3"] },
+  { aliases:["현대 세계의 변화","현대세계의변화"],                           targetIds:["SO_G6"] },
+  { aliases:["사회 탐구 방법","사회탐구방법"],                               targetIds:["SO_G7"] },
+  { aliases:["사회과제 연구","사회과제연구"],                                 targetIds:["SO_G7"] },
 
   // ── 과학계열 (과학고 전학생 대응) ──────────────────────────────
-  { aliases:["전문 수학","전문수학"],                                         targetIds:["MA_CA5","MA_CA6"] },
-  { aliases:["이산 수학","이산수학"],                                         targetIds:["MA_CA5"] },
+  { aliases:["전문 수학","전문수학"],                                         targetIds:["MA_G1","MA_G2"] },
+  { aliases:["이산 수학","이산수학"],                                         targetIds:["MA_G1"] },
   { aliases:["고급 기하","고급기하"],                                         targetIds:["MA_CA1"] },
   { aliases:["고급 생명과학","고급생명과학"],                                 targetIds:["SC_G3","SC_CA3"] },
   { aliases:["고급 지구과학","고급지구과학"],                                 targetIds:["SC_G4","SC_CA4"] },
@@ -391,23 +388,23 @@ const SUBJECT_ALIASES = [
   { aliases:["화학 실험","화학실험"],                                         targetIds:["SC_EX1","SC_G2"] },
   { aliases:["생명과학 실험","생명과학실험"],                                 targetIds:["SC_EX2","SC_G3"] },
   { aliases:["지구과학 실험","지구과학실험"],                                 targetIds:["SC_EX2","SC_G4"] },
-  { aliases:["과학과제 연구","과학과제연구"],                                 targetIds:["SC_CV1"] },
-  { aliases:["정보과학"],                                                      targetIds:["IT_CA1","IN_1"] },
+  { aliases:["과학과제 연구","과학과제연구"],                                 targetIds:["SC_C1","SC_C2"] },
+  { aliases:["정보과학"],                                                      targetIds:["IN_1"] },
 
   // ── 예술계열 음악 (예고 전학생 대응) ───────────────────────────
-  { aliases:["음악사"],                                                        targetIds:["MU_1","MU_3_2"] },
+  { aliases:["음악사"],                                                        targetIds:["MU_1"] },
   { aliases:["시창·청음","시창청음"],                                         targetIds:["MU_1"] },
-  { aliases:["음악 전공 실기","음악전공실기"],                                targetIds:["MU_3_1"] },
-  { aliases:["합창·합주","합창합주","합창","합주"],                           targetIds:["MU_3_1"] },
-  { aliases:["음악 공연 실습","음악공연실습"],                                targetIds:["MU_3_1"] },
+  { aliases:["음악 전공 실기","음악전공실기"],                                targetIds:["MU_1"] },
+  { aliases:["합창·합주","합창합주","합창","합주"],                           targetIds:["MU_1"] },
+  { aliases:["음악 공연 실습","음악공연실습"],                                targetIds:["MU_1"] },
 
   // ── 예술계열 미술 ───────────────────────────────────────────────
-  { aliases:["미술 이론","미술이론"],                                         targetIds:["AR_CA1","AR_1"] },
-  { aliases:["드로잉"],                                                        targetIds:["AR_1","AR_3_1"] },
-  { aliases:["미술사"],                                                        targetIds:["AR_1","AR_3_2"] },
-  { aliases:["조형 탐구","조형탐구"],                                         targetIds:["AR_1","AR_3_1"] },
-  { aliases:["미술 매체 탐구","미술매체탐구"],                               targetIds:["AR_CV1"] },
-  { aliases:["미술과 사회","미술과사회"],                                     targetIds:["AR_CV1","AR_1"] },
+  { aliases:["미술 이론","미술이론"],                                         targetIds:["AR_1"] },
+  { aliases:["드로잉"],                                                        targetIds:["AR_1"] },
+  { aliases:["미술사"],                                                        targetIds:["AR_1"] },
+  { aliases:["조형 탐구","조형탐구"],                                         targetIds:["AR_1"] },
+  { aliases:["미술 매체 탐구","미술매체탐구"],                               targetIds:["AR_1"] },
+  { aliases:["미술과 사회","미술과사회"],                                     targetIds:["AR_1"] },
 
   // ── 예술계열 무용 (예술 영역으로 인정) ─────────────────────────
   { aliases:["무용의 이해","무용이해","무용과 몸","무용과몸",
@@ -419,7 +416,7 @@ const SUBJECT_ALIASES = [
   { aliases:["문예 창작의 이해","문예창작의이해","문장론",
              "문학 감상과 비평","문학감상과비평",
              "시 창작","시창작","소설 창작","소설창작",
-             "극 창작","극창작","문학과 매체","문학과매체"],                  targetIds:["KO_G3","KO_CA2"] },
+             "극 창작","극창작","문학과 매체","문학과매체"],                  targetIds:["KO_G1","KO_CA2"] },
 
   // ── 예술계열 연극·영화·사진 (예술 영역으로 인정) ───────────────
   { aliases:["연극과 몸","연극과몸","연극과 말","연극과말","연기",
@@ -429,24 +426,24 @@ const SUBJECT_ALIASES = [
   { aliases:["영화의 이해","영화이해","촬영·조명","촬영조명",
              "영화와 삶","영화와삶","편집·사운드","편집사운드",
              "영화 제작 실습","영화제작실습",
-             "영화 감상과 비평","영화감상과비평"],                             targetIds:["AR_1","AR_CV1"] },
+             "영화 감상과 비평","영화감상과비평"],                             targetIds:["AR_1"] },
   { aliases:["사진의 이해","사진이해","사진 촬영","사진촬영",
              "사진 표현 기법","사진표현기법","영상 제작의 이해","영상제작의이해",
-             "사진과 삶","사진과삶","사진 감상과 비평","사진감상과비평"],      targetIds:["AR_1","AR_CV1"] },
+             "사진과 삶","사진과삶","사진 감상과 비평","사진감상과비평"],      targetIds:["AR_1"] },
 
   // ── 체육계열 (체고 전학생 대응) ────────────────────────────────
-  { aliases:["스포츠 개론","스포츠개론"],                                     targetIds:["PE_3_3","PE_1_1"] },
+  { aliases:["스포츠 개론","스포츠개론"],                                     targetIds:["PE_2_1","PE_1_1"] },
   { aliases:["육상"],                                                          targetIds:["PE_1_1"] },
   { aliases:["체조"],                                                          targetIds:["PE_1_1"] },
   { aliases:["수상 스포츠","수상스포츠"],                                     targetIds:["PE_1_1"] },
-  { aliases:["심화 체육 전공 실기","심화체육전공실기"],                       targetIds:["PE_3_4"] },
-  { aliases:["고급 체육 전공 실기","고급체육전공실기"],                       targetIds:["PE_3_4"] },
-  { aliases:["스포츠 경기 체력","스포츠경기체력"],                           targetIds:["PE_3_3"] },
-  { aliases:["스포츠 생리의학","스포츠생리의학"],                             targetIds:["PE_3_3"] },
-  { aliases:["스포츠 경기 기술","스포츠경기기술"],                           targetIds:["PE_3_4","PE_1_1"] },
-  { aliases:["스포츠 경기 분석","스포츠경기분석"],                           targetIds:["PE_3_2","PE_1_2"] },
-  { aliases:["스포츠 행정 및 경영","스포츠행정및경영"],                      targetIds:["PE_3_1"] },
-  { aliases:["스포츠 교육","스포츠교육"],                                     targetIds:["PE_3_3"] },
+  { aliases:["심화 체육 전공 실기","심화체육전공실기"],                       targetIds:["PE_1_1"] },
+  { aliases:["고급 체육 전공 실기","고급체육전공실기"],                       targetIds:["PE_1_1"] },
+  { aliases:["스포츠 경기 체력","스포츠경기체력"],                           targetIds:["PE_2_1"] },
+  { aliases:["스포츠 생리의학","스포츠생리의학"],                             targetIds:["PE_2_1"] },
+  { aliases:["스포츠 경기 기술","스포츠경기기술"],                           targetIds:["PE_1_1"] },
+  { aliases:["스포츠 경기 분석","스포츠경기분석"],                           targetIds:["PE_1_2"] },
+  { aliases:["스포츠 행정 및 경영","스포츠행정및경영"],                      targetIds:["PE_2_1"] },
+  { aliases:["스포츠 교육","스포츠교육"],                                     targetIds:["PE_2_1"] },
 
   // ── 외고 제2외국어 전공 과목 (area: others) ─────────────────────
   // 전공 기초 (입문 수준)
@@ -469,26 +466,26 @@ const SUBJECT_ALIASES = [
              "아랍어 회화Ⅱ","아랍어회화Ⅱ","아랍어 회화2"],                  targetIds:["L2_CN2"] },
   { aliases:["베트남어 회화Ⅰ","베트남어회화Ⅰ","베트남어 회화1",
              "베트남어 회화Ⅱ","베트남어회화Ⅱ","베트남어 회화2"],            targetIds:["L2_CN2"] },
-  // 문화권 과목 (융합선택)
-  { aliases:["독일어권 문화","독일어권문화"],                                 targetIds:["L2_CN3"] },
-  { aliases:["프랑스어권 문화","프랑스어권문화"],                             targetIds:["L2_CN3"] },
-  { aliases:["스페인어권 문화","스페인어권문화"],                             targetIds:["L2_CN3"] },
-  { aliases:["러시아 문화","러시아문화"],                                     targetIds:["L2_CN3"] },
-  { aliases:["아랍 문화","아랍문화"],                                         targetIds:["L2_CN3"] },
-  { aliases:["베트남 문화","베트남문화"],                                     targetIds:["L2_CN3"] },
+  // 문화권 과목 (융합선택 → 회화 수준으로 인정)
+  { aliases:["독일어권 문화","독일어권문화"],                                 targetIds:["L2_CN2"] },
+  { aliases:["프랑스어권 문화","프랑스어권문화"],                             targetIds:["L2_CN2"] },
+  { aliases:["스페인어권 문화","스페인어권문화"],                             targetIds:["L2_CN2"] },
+  { aliases:["러시아 문화","러시아문화"],                                     targetIds:["L2_CN2"] },
+  { aliases:["아랍 문화","아랍문화"],                                         targetIds:["L2_CN2"] },
+  { aliases:["베트남 문화","베트남문화"],                                     targetIds:["L2_CN2"] },
   // 독해와 작문Ⅰ·Ⅱ, 심화 (고급 → 심화 수준으로 인정)
   { aliases:["독일어 독해와 작문Ⅰ","독일어독해와작문1",
-             "독일어 독해와 작문Ⅱ","독일어독해와작문2","심화 독일어","심화독일어"],  targetIds:["L2_CN4"] },
+             "독일어 독해와 작문Ⅱ","독일어독해와작문2","심화 독일어","심화독일어"],  targetIds:["L2_CN2"] },
   { aliases:["프랑스어 독해와 작문Ⅰ","프랑스어독해와작문1",
-             "프랑스어 독해와 작문Ⅱ","프랑스어독해와작문2","심화 프랑스어","심화프랑스어"], targetIds:["L2_CN4"] },
+             "프랑스어 독해와 작문Ⅱ","프랑스어독해와작문2","심화 프랑스어","심화프랑스어"], targetIds:["L2_CN2"] },
   { aliases:["스페인어 독해와 작문Ⅰ","스페인어독해와작문1",
-             "스페인어 독해와 작문Ⅱ","스페인어독해와작문2","심화 스페인어","심화스페인어"], targetIds:["L2_CN4"] },
+             "스페인어 독해와 작문Ⅱ","스페인어독해와작문2","심화 스페인어","심화스페인어"], targetIds:["L2_CN2"] },
   { aliases:["러시아어 독해와 작문Ⅰ","러시아어독해와작문1",
-             "러시아어 독해와 작문Ⅱ","러시아어독해와작문2","심화 러시아어","심화러시아어"], targetIds:["L2_CN4"] },
+             "러시아어 독해와 작문Ⅱ","러시아어독해와작문2","심화 러시아어","심화러시아어"], targetIds:["L2_CN2"] },
   { aliases:["아랍어 독해와 작문Ⅰ","아랍어독해와작문1",
-             "아랍어 독해와 작문Ⅱ","아랍어독해와작문2","심화 아랍어","심화아랍어"],      targetIds:["L2_CN4"] },
+             "아랍어 독해와 작문Ⅱ","아랍어독해와작문2","심화 아랍어","심화아랍어"],      targetIds:["L2_CN2"] },
   { aliases:["베트남어 독해와 작문Ⅰ","베트남어독해와작문1",
-             "베트남어 독해와 작문Ⅱ","베트남어독해와작문2","심화 베트남어","심화베트남어"], targetIds:["L2_CN4"] },
+             "베트남어 독해와 작문Ⅱ","베트남어독해와작문2","심화 베트남어","심화베트남어"], targetIds:["L2_CN2"] },
 ];
 
 // ============================================================
