@@ -83,6 +83,7 @@ function initStep1() {
   function setType(type) {
     state.userType = type;
     state.semesterSubjects = {};
+    state.manualAreaMappings = {};
     btnTransfer.classList.toggle("active", type === 'transfer');
     btnCurrent.classList.toggle("active",  type === 'current');
     document.getElementById("grade-label").textContent =
@@ -104,6 +105,7 @@ function initStep1() {
     if (!name) { showToast("이름을 입력해주세요."); return; }
     state.studentInfo = { name, grade, semester };
     state.semesterSubjects = {};
+    state.manualAreaMappings = {};
     renderStep2();
     goToStep(2);
   });
@@ -540,6 +542,7 @@ function computeTransferMatching() {
   const preAreaCredits = {}; // { area코드: 학점 } — autoMatch 성공분
   const preUnmatchedSubs = []; // autoMatch 실패 → 수동 영역 지정 대상
   const preSems = [];
+  let unmatchedIdx = 0; // key 고유성 보장용 전역 인덱스
   for (const { year, semester: s } of sems) {
     if (year === grade && s === semester) break;
     const key = `${year}-${s}`;
@@ -552,7 +555,8 @@ function computeTransferMatching() {
         const area = r.targets[0].area;
         if (area) preAreaCredits[area] = (preAreaCredits[area] || 0) + sub.credits;
       } else {
-        preUnmatchedSubs.push({ name: sub.name, credits: sub.credits });
+        // 인덱스 포함해 key 완전 고유성 보장 (같은 이름+학점+학기 중복도 구분)
+        preUnmatchedSubs.push({ name: sub.name, credits: sub.credits, year, semester: s, idx: unmatchedIdx++ });
       }
     }
     preSems.push({ year, semester: s, subjects, semCredits });
@@ -706,11 +710,12 @@ function renderStep3() {
 
       let rows = '';
       for (const sub of unmatchedSubs) {
-        const key = `${sub.name}|${sub.credits}`;
+        // key에 학년-학기 포함 → 같은 과목명이 여러 학기에 중복 등장해도 각각 처리
+        const key = `${sub.name}|${sub.credits}|${sub.year}-${sub.semester}|${sub.idx}`;
         const cur = state.manualAreaMappings[key] || '';
         rows += `
           <tr>
-            <td style="padding:6px 8px;font-size:0.88rem">${sub.name}</td>
+            <td style="padding:6px 8px;font-size:0.88rem">${sub.name} <span style="color:var(--gray-400);font-size:0.78rem">(${sub.year}학년 ${sub.semester}학기)</span></td>
             <td style="padding:6px 8px;font-size:0.88rem;color:var(--gray-500)">${sub.credits}학점</td>
             <td style="padding:6px 4px">
               <select data-key="${key}"
