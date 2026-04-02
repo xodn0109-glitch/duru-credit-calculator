@@ -533,8 +533,10 @@ function computeTransferMatching() {
   const { grade, semester } = state.studentInfo;
   const sems = getSemesters(grade, semester);
 
-  // ① 전입 이전 학기: 학점 합산만 (매칭 불필요 — 이미 이수 완료된 학점)
+  // ① 전입 이전 학기: 학점 합산 + 영역별 분류
+  // 총 학점(preCredits)은 raw 합산, 영역별(preAreaCredits)은 autoMatch로 area 추출
   let preCredits = 0;
+  const preAreaCredits = {}; // { area코드: 학점 }
   const preSems = [];
   for (const { year, semester: s } of sems) {
     if (year === grade && s === semester) break;
@@ -542,6 +544,13 @@ function computeTransferMatching() {
     const subjects = state.semesterSubjects[key] || [];
     const semCredits = subjects.reduce((a, sub) => a + sub.credits, 0);
     preCredits += semCredits;
+    for (const sub of subjects) {
+      const r = autoMatch(sub.name);
+      if (r.matched && r.targets.length > 0) {
+        const area = r.targets[0].area;
+        if (area) preAreaCredits[area] = (preAreaCredits[area] || 0) + sub.credits;
+      }
+    }
     preSems.push({ year, semester: s, subjects, semCredits });
   }
 
@@ -614,7 +623,7 @@ function computeTransferMatching() {
 
   state.matchResults = {
     type: 'transfer',
-    preSems, preCredits,
+    preSems, preCredits, preAreaCredits,
     transResults, transMatchedIds,
     fixedSlotStatus, distSlotStatus,
     allIds,
@@ -891,15 +900,17 @@ function calcResults() {
   const mandatoryToComplete = toCompleteCollapsed.filter(s => s.type === "common");
   const electiveToComplete  = toCompleteCollapsed.filter(s => s.type !== "common");
 
+  const preAreaCredits = state.userType === 'transfer'
+    ? (state.matchResults.preAreaCredits || {})
+    : {};
+
   const areaStatus = {};
   for (const [code, name] of Object.entries(AREA_NAMES)) {
     const required = GRADUATION_REQUIREMENTS.areaMinCredits[code] || 0;
+    // 두루고 과목 기준 done (전입학기 매칭 포함)
     let done = alreadyDone.filter(s => s.area === code).reduce((a, s) => a + s.credits, 0);
-    // 중복이수 학점을 영역별에도 반영
-    for (const id of dupIds) {
-      const sub = getSubjectById(id);
-      if (sub && sub.area === code) done += sub.credits;
-    }
+    // 전학생: 이전 학기 영역별 학점 추가 (autoMatch 성공분만, raw 학점 기준)
+    done += preAreaCredits[code] || 0;
     const remain = reachableToComplete.filter(s => s.area === code).reduce((a, s) => a + s.credits, 0);
     areaStatus[code] = { name, required, done, remain };
   }
