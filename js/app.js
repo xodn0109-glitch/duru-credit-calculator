@@ -8,6 +8,7 @@ const state = {
   studentInfo: {},           // { name, grade, semester }
   semesterSubjects: {},      // { "y-s": [{name, credits, locked?}] }
   matchResults: null,        // 매칭 계산 결과
+  manualAreaMappings: {},    // { "과목명|학점": areaCode } — 이전학기 미매칭 과목 수동 영역 지정
 };
 
 const ACTIVITY_CREDITS = 18;
@@ -536,7 +537,8 @@ function computeTransferMatching() {
   // ① 전입 이전 학기: 학점 합산 + 영역별 분류
   // 총 학점(preCredits)은 raw 합산, 영역별(preAreaCredits)은 autoMatch로 area 추출
   let preCredits = 0;
-  const preAreaCredits = {}; // { area코드: 학점 }
+  const preAreaCredits = {}; // { area코드: 학점 } — autoMatch 성공분
+  const preUnmatchedSubs = []; // autoMatch 실패 → 수동 영역 지정 대상
   const preSems = [];
   for (const { year, semester: s } of sems) {
     if (year === grade && s === semester) break;
@@ -549,6 +551,8 @@ function computeTransferMatching() {
       if (r.matched && r.targets.length > 0) {
         const area = r.targets[0].area;
         if (area) preAreaCredits[area] = (preAreaCredits[area] || 0) + sub.credits;
+      } else {
+        preUnmatchedSubs.push({ name: sub.name, credits: sub.credits });
       }
     }
     preSems.push({ year, semester: s, subjects, semCredits });
@@ -623,7 +627,7 @@ function computeTransferMatching() {
 
   state.matchResults = {
     type: 'transfer',
-    preSems, preCredits, preAreaCredits,
+    preSems, preCredits, preAreaCredits, preUnmatchedSubs,
     transResults, transMatchedIds,
     fixedSlotStatus, distSlotStatus,
     allIds,
@@ -688,6 +692,54 @@ function renderStep3() {
     compDiv.innerHTML = `<span style="color:${compColor};font-weight:700;margin-right:6px">${compIcon} 두루고 비교</span>${compText}`;
     card.appendChild(compDiv);
     preSumEl.appendChild(card);
+
+    // ── 수동 영역 지정 (autoMatch 실패 과목) ──
+    const unmatchedSubs = mr.preUnmatchedSubs || [];
+    if (unmatchedSubs.length > 0) {
+      const manualCard = document.createElement("div");
+      manualCard.className = "card";
+      manualCard.style.marginTop = "12px";
+
+      const areaOptions = [['', '영역 미지정'], ...Object.entries(AREA_NAMES)]
+        .map(([code, name]) => `<option value="${code}">${name}</option>`)
+        .join('');
+
+      let rows = '';
+      for (const sub of unmatchedSubs) {
+        const key = `${sub.name}|${sub.credits}`;
+        const cur = state.manualAreaMappings[key] || '';
+        rows += `
+          <tr>
+            <td style="padding:6px 8px;font-size:0.88rem">${sub.name}</td>
+            <td style="padding:6px 8px;font-size:0.88rem;color:var(--gray-500)">${sub.credits}학점</td>
+            <td style="padding:6px 4px">
+              <select data-key="${key}"
+                style="font-size:0.83rem;padding:4px 6px;border:1px solid var(--gray-300);border-radius:6px;width:100%"
+                onchange="onManualAreaChange(this)">
+                ${areaOptions.replace(`value="${cur}"`, `value="${cur}" selected`)}
+              </select>
+            </td>
+          </tr>`;
+      }
+
+      manualCard.innerHTML = `
+        <div class="card-title">✏️ 교과 영역 수동 지정</div>
+        <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:12px">
+          두루고 편제와 과목명이 달라 자동 분류되지 않은 과목입니다.
+          담당 교사가 해당 교과 영역을 지정하면 졸업 분석에 즉시 반영됩니다.
+        </p>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="font-size:0.8rem;color:var(--gray-500);border-bottom:1px solid var(--gray-200)">
+              <th style="text-align:left;padding:4px 8px;font-weight:600">과목명</th>
+              <th style="text-align:left;padding:4px 8px;font-weight:600">학점</th>
+              <th style="text-align:left;padding:4px 8px;font-weight:600">교과 영역</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+      preSumEl.appendChild(manualCard);
+    }
   }
 
   // ── 전입학기 두루고 편제 매칭 ──
@@ -900,9 +952,18 @@ function calcResults() {
   const mandatoryToComplete = toCompleteCollapsed.filter(s => s.type === "common");
   const electiveToComplete  = toCompleteCollapsed.filter(s => s.type !== "common");
 
-  const preAreaCredits = state.userType === 'transfer'
-    ? (state.matchResults.preAreaCredits || {})
-    : {};
+  // 이전 학기 영역별 학점: autoMatch 성공분 + 수동 지정분 합산
+  const preAreaCredits = {};
+  if (state.userType === 'transfer') {
+    for (const [code, credits] of Object.entries(state.matchResults.preAreaCredits || {})) {
+      preAreaCredits[code] = (preAreaCredits[code] || 0) + credits;
+    }
+    for (const [key, areaCode] of Object.entries(state.manualAreaMappings || {})) {
+      if (!areaCode) continue;
+      const credits = parseInt(key.split('|')[1]) || 0;
+      preAreaCredits[areaCode] = (preAreaCredits[areaCode] || 0) + credits;
+    }
+  }
 
   const areaStatus = {};
   for (const [code, name] of Object.entries(AREA_NAMES)) {
@@ -970,7 +1031,11 @@ function renderStep4() {
     const note = document.createElement("div");
     note.id = "area-transfer-note";
     note.style.cssText = "font-size:0.82rem;color:var(--gray-500);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px";
-    note.innerHTML = `ℹ️ 아래 영역별 현황은 <strong>두루고 이수 예정 과목 기준</strong>입니다. 이전 학교 이수 학점(${res.recognizedCredits}학점)은 영역별로 분류할 수 없으므로 포함되지 않습니다.`;
+    const unmatchedCount = (state.matchResults?.preUnmatchedSubs || []).length;
+    const unmatchedNote = unmatchedCount > 0
+      ? ` 과목명 불일치로 자동 분류 안 된 <strong>${unmatchedCount}개 과목</strong>은 Step 3에서 영역을 수동 지정하세요.`
+      : '';
+    note.innerHTML = `ℹ️ 이전 학교 이수 학점은 과목명 매칭 성공 시에만 영역별로 분류됩니다.${unmatchedNote}`;
     areaBody.closest("table")?.parentElement?.insertBefore(note, areaBody.closest("table"));
   }
 
@@ -1214,6 +1279,62 @@ function goToStep(n) {
 
 // ── 인쇄 ──────────────────────────────────────────────────────
 function printResult() { window.print(); }
+
+// ── 수동 영역 지정 onChange ───────────────────────────────────
+function onManualAreaChange(selectEl) {
+  const key = selectEl.dataset.key;
+  const areaCode = selectEl.value;
+  state.manualAreaMappings[key] = areaCode;
+
+  // Step 4가 열려 있으면 영역 테이블 + 졸업 판정 실시간 업데이트
+  if (state.step === 4) {
+    refreshStep4Area();
+  }
+}
+
+// Step 4 영역 테이블 + 졸업 판정 부분 업데이트
+function refreshStep4Area() {
+  const res = calcResults();
+
+  // 영역별 현황 테이블
+  const areaBody = document.getElementById("area-table-body");
+  if (areaBody) {
+    areaBody.innerHTML = "";
+    for (const [code, st] of Object.entries(res.areaStatus)) {
+      if (st.required === 0 && st.done === 0) continue;
+      const pctArea = st.required > 0 ? Math.min(100, Math.round(st.done / st.required * 100)) : 100;
+      const ok = st.required === 0 || st.done >= st.required;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${st.name}</td>
+        <td class="num">${st.required || "—"}</td>
+        <td class="num text-green">${st.done}</td>
+        <td class="num text-orange">${st.remain > 0 ? st.remain : "—"}</td>
+        <td><div class="mini-bar"><div class="mini-bar-fill" style="width:${pctArea}%"></div></div></td>
+        <td class="${ok ? "text-green" : "text-red"}">${ok ? "✔ 충족" : `✘ ${st.required - st.done}학점 부족`}</td>
+      `;
+      areaBody.appendChild(tr);
+    }
+  }
+
+  // 졸업 판정 상태
+  const statusEl = document.getElementById("graduation-status");
+  if (statusEl) {
+    const isCurrent = state.userType === 'current';
+    const totalGap = GRADUATION_REQUIREMENTS.totalCredits - res.totalExpected;
+    if (totalGap <= 0) {
+      statusEl.className = "grad-status grad-ok";
+      statusEl.innerHTML = `✅ 계획대로 이수 시 졸업 요건 192학점 충족 — 남은 교과 학점 <strong>${res.remainCredits}학점</strong> 이수 필요`;
+    } else {
+      statusEl.className = "grad-status grad-warn";
+      statusEl.innerHTML = `⚠️ 현재 ${isCurrent ? "이수" : "인정"} 교과 학점 ${res.recognizedCredits}학점으로는 <strong>${totalGap}학점 부족</strong> — 아래 과목 이수 계획 필수`;
+    }
+  }
+
+  // 경고 목록 갱신
+  renderWarnings(res);
+  renderAlternativePaths(res);
+}
 
 // ── 토스트 ───────────────────────────────────────────────────
 function showToast(msg) {
